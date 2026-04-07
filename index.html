@@ -208,6 +208,7 @@ header span{font-size:13px;opacity:.8}
     <button class="btn-primary" onclick="savePlan()">Guardar</button>
   </div>
   <div class="plan-grid" id="planGrid"></div>
+  <div id="planDisplay" style="margin-top:20px"></div>
 </div>
 
 <!-- URL MODAL -->
@@ -696,7 +697,39 @@ function renderPlan(){
   });
 }
 function shiftWeek(dir){planWeekOffset+=dir;renderPlan();}
-function savePlan(){planData={};document.querySelectorAll("#planGrid input").forEach(function(inp){if(inp.value.trim())planData[inp.dataset.key]=inp.value.trim();});saveToCloud();var btn=event.target;btn.textContent="✓ Guardado";setTimeout(function(){btn.textContent="Guardar";},1500);}
+function savePlan(){
+  planData={};
+  document.querySelectorAll("#planGrid input").forEach(function(inp){if(inp.value.trim())planData[inp.dataset.key]=inp.value.trim();});
+  saveToCloud();
+  renderPlanDisplay();
+  var btn=event.target;btn.textContent="✓ Guardado";setTimeout(function(){btn.textContent="Guardar";},1500);
+}
+
+function renderPlanDisplay(){
+  var el=ge("planDisplay");
+  if(!el) return;
+  var hasData=Object.keys(planData).length>0;
+  if(!hasData){el.innerHTML="";return;}
+  var mon=getMondayOfWeek(planWeekOffset);
+  var html='<div style="border-top:1px solid #2a2a2a;padding-top:16px"><p style="font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Resumen</p>'
+    +'<div style="display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid #2a2a2a">';
+  DAY_OFFSETS.forEach(function(offset,i){
+    var date=new Date(mon); date.setDate(mon.getDate()+offset);
+    var slots=SLOTS[i+1];
+    html+='<div style="flex:1;border-right:'+(i<4?'1px solid #2a2a2a':'none')+'">'
+      +'<div class="plan-day-header" style="text-align:center">'+DAY_NAMES[i]+'</div>';
+    slots.forEach(function(slot){
+      var val=planData[planKey(date,slot)]||"—";
+      html+='<div style="padding:8px 10px;border-top:1px solid #2a2a2a">'
+        +'<div class="plan-slot-label">'+slot+'</div>'
+        +'<div style="font-size:12px;font-weight:500;color:'+(val==="—"?"#444":"#f0ece3")+'">'+val+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
+}
 
 /* ── URL SETTINGS ── */
 function openUrlModal(){ge("workerUrlInput").value=WORKER_URL;ge("urlModalOverlay").classList.add("open");}
@@ -715,7 +748,7 @@ function switchTab(id,el){
   if(el)el.classList.add("active");
   ge("tab-"+id).classList.add("active");
   if(id==="historial") renderHistorial();
-  if(id==="plan") renderPlan();
+  if(id==="plan") {renderPlan();renderPlanDisplay();}
 }
 
 init();
