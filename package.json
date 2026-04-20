@@ -1,0 +1,8 @@
+{
+  "name": "el-toro",
+  "private": true,
+  "scripts": {
+    "dev": "node serve.js",
+    "build": "node build.js"
+  }
+}
