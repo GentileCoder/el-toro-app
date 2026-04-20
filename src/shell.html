@@ -26,15 +26,10 @@
 <div id="appContainer" style="display:none">
 
 <header>
-  <h1 style="display:flex;align-items:center;gap:10px">
-    <img src="logo.png" style="height:38px;width:auto">
-    PURO
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40" style="width:28px;height:19px;vertical-align:middle;border-radius:2px"><rect width="60" height="40" fill="#c60b1e"/><rect y="10" width="60" height="20" fill="#ffc400"/></svg>
-  </h1>
+  <h1>PURO</h1>
   <span id="headerDate"></span>
   <div style="display:flex;align-items:center;gap:10px">
     <span id="syncStatus" style="font-size:12px;opacity:.8"></span>
-    <button id="urlBtn" onclick="openUrlModal()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">⚙ URL</button>
     <button onclick="handleLogout()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">Salir</button>
   </div>
 </header>
@@ -126,19 +121,6 @@
 <div class="content" id="tab-usuarios">
 </div>
 
-<!-- URL MODAL -->
-<div class="modal-overlay" id="urlModalOverlay">
-  <div class="modal" style="width:380px">
-    <h2>Worker URL</h2>
-    <div class="modal-sub">Pega la URL de tu Cloud Run worker</div>
-    <label>URL</label>
-    <input type="text" id="workerUrlInput" placeholder="https://el-toro-worker-....run.app">
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="ge('urlModalOverlay').classList.remove('open')">Cancelar</button>
-      <button class="btn-save" onclick="saveWorkerUrl()">Conectar</button>
-    </div>
-  </div>
-</div>
 
 <!-- RESERVATION MODAL -->
 <div class="modal-overlay" id="resModalOverlay">

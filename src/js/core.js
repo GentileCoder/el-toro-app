@@ -13,7 +13,7 @@ var DAY_NAMES=["Martes","Miércoles","Jueves","Viernes","Sábado"];
 var DAY_OFFSETS=[1,2,3,4,5];
 var SLOTS={1:["Fijo","Springer 1","Springer 2"],2:["Fijo","Springer 1","Springer 2"],3:["Fijo","Springer 1","Springer 2"],4:["Fijo 1","Fijo 2","Springer"],5:["Fijo 1","Fijo 2","Springer"]};
 
-var WORKER_URL=localStorage.getItem("puro_worker_url")||"";
+var WORKER_URL="GOOGLE_CLOUD_URL";
 var saveTimeout=null;
 
 function ge(id){return document.getElementById(id);}
@@ -30,19 +30,19 @@ function saveToCloud(){
   if(!WORKER_URL) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(function(){
-    setSyncStatus("Guardando…","#e8c67c");
+    setSyncStatus("Guardando…","#f59e0b");
     var payload={sections:sections,reservations:reservations,categories:categories,articulos:articulos,planData:planData,openTables:openTables};
     var hdrs={"Content-Type":"application/json"};
     if(window.authToken) hdrs["Authorization"]="Bearer "+window.authToken;
     fetch(WORKER_URL,{method:"POST",headers:hdrs,body:JSON.stringify(payload)})
-      .then(function(){setSyncStatus("Guardado ✓","#7ed4a7");})
-      .catch(function(){setSyncStatus("Sin conexión","#e87c7c");});
+      .then(function(){setSyncStatus("Guardado ✓","#22c55e");})
+      .catch(function(){setSyncStatus("Sin conexión","#ef4444");});
   },800);
 }
 
 function loadFromCloud(callback){
-  if(!WORKER_URL){setSyncStatus("Sin URL","#e87c7c");callback();return;}
-  setSyncStatus("Cargando…","#e8c67c");
+  if(!WORKER_URL){setSyncStatus("Sin URL","#ef4444");callback();return;}
+  setSyncStatus("Cargando…","#f59e0b");
   var loadHdrs={};
   if(window.authToken) loadHdrs["Authorization"]="Bearer "+window.authToken;
   fetch(WORKER_URL,{headers:loadHdrs})
@@ -54,7 +54,7 @@ function loadFromCloud(callback){
       if(d.articulos&&d.articulos.length) articulos=d.articulos;
       if(d.planData) planData=d.planData;
       if(d.openTables) openTables=d.openTables;
-      setSyncStatus("Sincronizado ✓","#7ed4a7");
+      setSyncStatus("Sincronizado ✓","#22c55e");
       callback();
     })
     .catch(function(){
@@ -64,15 +64,15 @@ function loadFromCloud(callback){
 }
 
 function applyResColor(el,status){
-  var bg=status==="free"?"#1d4a2e":status==="once"?"#4a3a1d":"#4a1d1d";
-  var fg=status==="free"?"#7ed4a7":status==="once"?"#e8c67c":"#e87c7c";
+  var bg=status==="free"?"#0d3321":status==="once"?"#3d2200":"#3d0c0c";
+  var fg=status==="free"?"#6ee7b7":status==="once"?"#fcd34d":"#fca5a5";
   el.style.setProperty("background-color",bg,"important");
   el.style.setProperty("color",fg,"important");
   el.querySelectorAll(".tid,.tslot").forEach(function(c){c.style.setProperty("color",fg,"important");});
 }
 function applyMesaColor(el,isOpen){
-  var bg=isOpen?"#4a1d1d":"#1d4a2e";
-  var fg=isOpen?"#e87c7c":"#7ed4a7";
+  var bg=isOpen?"#3d0c0c":"#0d3321";
+  var fg=isOpen?"#fca5a5":"#6ee7b7";
   el.style.setProperty("background-color",bg,"important");
   el.style.setProperty("color",fg,"important");
   el.querySelectorAll(".tid,.tslot").forEach(function(c){c.style.setProperty("color",fg,"important");});
@@ -90,14 +90,6 @@ function renderSectionPills(cid,active,fn){
   el.innerHTML=h;
 }
 
-function openUrlModal(){ge("workerUrlInput").value=WORKER_URL;ge("urlModalOverlay").classList.add("open");}
-function saveWorkerUrl(){
-  var url=ge("workerUrlInput").value.trim();
-  WORKER_URL=url;
-  localStorage.setItem("puro_worker_url",url);
-  ge("urlModalOverlay").classList.remove("open");
-  loadFromCloud(function(){renderCatFilter();renderArticulos();renderReservationsTab();renderMesasOverview();renderHistorial();});
-}
 
 function switchTab(id,el){
   document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});

@@ -9,10 +9,10 @@ var fbAuth = firebase.auth();
 
 fbAuth.onAuthStateChanged(function(user) {
   if (user) {
-    user.getIdToken().then(function(token) {
-      var payload = JSON.parse(atob(token.split('.')[1]));
-      window.authToken = token;
-      window.userRole = payload.role || '';
+    user.getIdTokenResult(true).then(function(result) {
+      console.log('Auth claims:', result.claims);
+      window.authToken = result.token;
+      window.userRole = result.claims.role || '';
       window.authUser = user;
       setInterval(function() {
         user.getIdToken(true).then(function(t) { window.authToken = t; });
@@ -59,7 +59,6 @@ function applyRoleVisibility() {
 
   ge('cobrarBtn').style.display = (isAdmin || isStaff) ? '' : 'none';
   ge('configurarBtn').style.display = isAdmin ? '' : 'none';
-  ge('urlBtn').style.display = isAdmin ? '' : 'none';
 
   if (role === 'springer') {
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
