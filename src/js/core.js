@@ -13,7 +13,7 @@ var DAY_NAMES=["Martes","Miércoles","Jueves","Viernes","Sábado"];
 var DAY_OFFSETS=[1,2,3,4,5];
 var SLOTS={1:["Fijo","Springer 1","Springer 2"],2:["Fijo","Springer 1","Springer 2"],3:["Fijo","Springer 1","Springer 2"],4:["Fijo 1","Fijo 2","Springer"],5:["Fijo 1","Fijo 2","Springer"]};
 
-var WORKER_URL=localStorage.getItem("eltoro_worker_url")||"";
+var WORKER_URL=localStorage.getItem("puro_worker_url")||"";
 var saveTimeout=null;
 
 function ge(id){return document.getElementById(id);}
@@ -94,7 +94,7 @@ function openUrlModal(){ge("workerUrlInput").value=WORKER_URL;ge("urlModalOverla
 function saveWorkerUrl(){
   var url=ge("workerUrlInput").value.trim();
   WORKER_URL=url;
-  localStorage.setItem("eltoro_worker_url",url);
+  localStorage.setItem("puro_worker_url",url);
   ge("urlModalOverlay").classList.remove("open");
   loadFromCloud(function(){renderCatFilter();renderArticulos();renderReservationsTab();renderMesasOverview();renderHistorial();});
 }
