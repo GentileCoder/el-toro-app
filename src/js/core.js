@@ -3,7 +3,9 @@ var categories=["Comida","Bebida","Softdrink","Café","Postre","Vino","Cerveza",
 var articulos=[], editingArtId=null;
 var openTables={};
 var history24=[];
-var selectedTableId=null, activeResSection="all", activeMesasSection="all";
+var selectedTableId=null, activeResSection="all", activeMesasSection="all", activeResView="grid";
+var currentOrderSlot=null;
+function getOrderKey(tableId,slot){return (slot===0||slot===1)?tableId+'_'+slot:tableId;}
 var pendingItems=[];
 var currentOrderTableId=null;
 var planWeekOffset=0;

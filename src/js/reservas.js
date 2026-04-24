@@ -16,9 +16,67 @@ function renderResTableGrid(date){
 }
 
 function renderReservationsTab(){
-  renderSectionPills("resSectionPills",activeResSection,"setResSection");
   var d=ge("filterDate").value||today();
-  renderResTableGrid(d); renderDetailPanel(d);
+  var isBook=activeResView==="book";
+  renderSectionPills("resSectionPills",activeResSection,"setResSection");
+  ge("resTableGrid").style.display=isBook?"none":"";
+  ge("resBookView").style.display=isBook?"":"none";
+  if(isBook){if(ge("resDetailPanel"))ge("resDetailPanel").innerHTML="";renderBookView(d);}
+  else{renderResTableGrid(d);renderDetailPanel(d);}
+  document.querySelectorAll(".view-btn").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-view")===activeResView);});
+}
+
+function setResView(v){activeResView=v;selectedTableId=null;renderReservationsTab();}
+
+function renderBookView(date){
+  var el=ge("resBookView");
+  var secs=activeResSection==="all"?sections:sections.filter(function(s){return s.id===activeResSection;});
+  var html='<div class="res-book-wrap">';
+  secs.forEach(function(sec){
+    if(activeResSection==="all") html+='<div class="res-book-section-label">'+sec.name+'</div>';
+    sec.tables.forEach(function(tbl){
+      var isDouble=tbl.type==="double";
+      if(isDouble){
+        var slotNames=tbl.slots||["A","B"];
+        var wholeItems=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&(r.slot===null||r.slot===undefined);}).sort(function(a,b){return a.from.localeCompare(b.from);});
+        var s0Items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&r.slot===0;}).sort(function(a,b){return a.from.localeCompare(b.from);});
+        var s1Items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&r.slot===1;}).sort(function(a,b){return a.from.localeCompare(b.from);});
+        var rowA=s0Items.map(function(r){return {r:r,blocked:false};}).concat(wholeItems.map(function(r){return {r:r,blocked:false,whole:true};})).sort(function(a,b){return a.r.from.localeCompare(b.r.from);});
+        var rowB=s1Items.map(function(r){return {r:r,blocked:false};}).concat(wholeItems.map(function(r){return {r:r,blocked:true};})).sort(function(a,b){return a.r.from.localeCompare(b.r.from);});
+        html+=renderTLRow(tbl.label,slotNames[0],rowA,tbl.id,0);
+        html+=renderTLRow(tbl.label,slotNames[1],rowB,tbl.id,1);
+      } else {
+        var items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled";}).sort(function(a,b){return a.from.localeCompare(b.from);}).map(function(r){return {r:r,blocked:false};});
+        html+=renderTLRow(tbl.label,null,items,tbl.id,null);
+      }
+    });
+  });
+  el.innerHTML=html+'</div>';
+}
+
+function renderTLRow(tblLabel,slotName,items,tblId,slot){
+  var label='<div class="res-tl-label"><strong>'+tblLabel+'</strong>'+(slotName?'<span class="res-book-slot">'+slotName+'</span>':'')+'</div>';
+  var cells='';
+  for(var i=0;i<3;i++){
+    var it=items[i];
+    if(!it){
+      cells+='<div class="res-tl-slot empty" onclick="openResModal('+tblId+','+(slot===null?'null':slot)+')">+</div>';
+    } else if(it.blocked){
+      cells+='<div class="res-tl-slot blocked"><div class="slot-time">'+it.r.from+'–'+it.r.to+'</div><div style="font-size:10px;color:#555">'+t('tables.whole')+'</div></div>';
+    } else {
+      var r=it.r;
+      cells+='<div class="res-tl-slot filled'+(it.whole?' whole':'')+'">'
+        +'<div class="slot-time">'+r.from+'–'+r.to+'</div>'
+        +'<div class="slot-name">'+r.name+(it.whole?' <span class="res-book-slot">'+t('tables.whole')+'</span>':'')+'</div>'
+        +'<div class="slot-foot">'
+        +'<span>'+r.guests+' '+t('reservations.pax')+'</span>'
+        +' <span class="res-badge badge-'+r.status+'" style="font-size:9px;padding:1px 5px">'+t(r.status==="confirmed"?"reservations.confirmed":"reservations.pending")+'</span>'
+        +' <button class="qty-btn" onclick="toggleResStatus('+r.id+')">'+(r.status==="confirmed"?"⟳":"✓")+'</button>'
+        +' <button class="qty-btn" style="color:#fca5a5" onclick="deleteRes('+r.id+')">✕</button>'
+        +'</div></div>';
+    }
+  }
+  return '<div class="res-tl-row">'+label+cells+'</div>';
 }
 
 function setResSection(id){activeResSection=id==="all"?"all":parseInt(id);selectedTableId=null;renderReservationsTab();}
@@ -45,17 +103,35 @@ function renderDetailPanel(d){
 function toggleResStatus(id){var r=reservations.find(function(x){return x.id===id;});if(r)r.status=r.status==="confirmed"?"pending":"confirmed";renderReservationsTab();saveToCloud();}
 function deleteRes(id){reservations=reservations.filter(function(x){return x.id!==id;});renderReservationsTab();saveToCloud();}
 
-function openResModal(tableId){
+function openResModal(tableId,slotIdx){
   var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
   ge("resModalTitle").textContent=t('res_modal.title'); ge("resModalSub").textContent=tbl?t('tables.table')+" "+tbl.label:"";
   ge("mName").value=""; ge("mGuests").value=2; ge("mDate").value=ge("filterDate").value||today();
   ge("mFrom").value="17:00"; ge("mTo").value="19:00"; ge("mNotes").value="";
   var s=ge("mTable"); s.innerHTML='<option value="">'+t('reservations.unassigned')+'</option>';
   sections.forEach(function(sec){var og=document.createElement("optgroup");og.label=sec.name;sec.tables.forEach(function(tb){var o=document.createElement("option");o.value=tb.id;o.textContent=tb.label;if(tableId===tb.id)o.selected=true;og.appendChild(o);});s.appendChild(og);});
+  updateResModalSlot(slotIdx);
   ge("resModalOverlay").classList.add("open");
 }
 
+function updateResModalSlot(preselect){
+  var tableId=parseInt(ge("mTable").value);
+  var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
+  var isDouble=tbl&&tbl.type==="double";
+  ge("mSlotRow").style.display=isDouble?"":"none";
+  if(isDouble){
+    var slots=tbl.slots||["A","B"];
+    ge("mSlot").innerHTML='<option value="null">'+t('tables.whole')+'</option>'
+      +slots.map(function(name,i){return '<option value="'+i+'">'+name+'</option>';}).join("");
+    if(preselect!==undefined&&preselect!==null) ge("mSlot").value=String(preselect);
+  }
+}
+
 function saveReservation(){
-  reservations.push({id:Date.now(),name:ge("mName").value||t('reservations.no_name'),guests:parseInt(ge("mGuests").value)||1,date:ge("mDate").value,from:ge("mFrom").value,to:ge("mTo").value,table:parseInt(ge("mTable").value)||null,notes:ge("mNotes").value,status:"confirmed"});
+  var tableId=parseInt(ge("mTable").value)||null;
+  var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
+  var slotVal=ge("mSlot").value;
+  var slot=tbl&&tbl.type==="double"?(slotVal==="null"?null:parseInt(slotVal)):null;
+  reservations.push({id:Date.now(),name:ge("mName").value||t('reservations.no_name'),guests:parseInt(ge("mGuests").value)||1,date:ge("mDate").value,from:ge("mFrom").value,to:ge("mTo").value,table:tableId,slot:slot,notes:ge("mNotes").value,status:"confirmed"});
   ge("resModalOverlay").classList.remove("open"); renderReservationsTab(); saveToCloud();
 }

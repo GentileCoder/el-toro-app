@@ -5,24 +5,68 @@ function renderMesasOverview(){
   secs.forEach(function(sec){
     if(activeMesasSection==="all"){var l=document.createElement("div");l.className="section-label";l.textContent=sec.name;g.appendChild(l);}
     sec.tables.forEach(function(tbl){
-      var isOpen=!!openTables[tbl.id];
-      var order=openTables[tbl.id];
-      var total=isOpen?orderTotal(order.items):0;
       var div=document.createElement("div"); div.className="tmesa";
-      var info=isOpen?'<span class="tslot">€'+total.toFixed(2)+'</span><span class="tslot">'+order.items.length+t('tables.items_suffix')+'</span>':'<span class="tslot">'+t('tables.free')+'</span>';
-      div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+info+'</div>';
-      div.addEventListener("click",function(){openOrderView(tbl.id);});
-      applyMesaColor(div,isOpen); g.appendChild(div);
+      if(tbl.type==="double"){
+        var slotNames=tbl.slots||["A","B"];
+        var wholeOrder=openTables[tbl.id];
+        var s0Order=openTables[tbl.id+"_0"];
+        var s1Order=openTables[tbl.id+"_1"];
+        var anyOpen=!!(wholeOrder||s0Order||s1Order);
+        var info;
+        if(wholeOrder){
+          info='<span class="tslot">'+t('tables.whole')+' · €'+orderTotal(wholeOrder.items).toFixed(2)+'</span>';
+        } else {
+          info='<span class="tslot">'+slotNames[0]+': '+(s0Order?'€'+orderTotal(s0Order.items).toFixed(2):t('tables.free'))+'</span>'
+              +'<span class="tslot">'+slotNames[1]+': '+(s1Order?'€'+orderTotal(s1Order.items).toFixed(2):t('tables.free'))+'</span>';
+        }
+        div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+info+'</div>';
+        div.addEventListener("click",function(){openDoubleTablePicker(tbl.id);});
+        applyMesaColor(div,anyOpen);
+      } else {
+        var isOpen=!!openTables[tbl.id];
+        var order=openTables[tbl.id];
+        var info2=isOpen?'<span class="tslot">€'+orderTotal(order.items).toFixed(2)+'</span><span class="tslot">'+order.items.length+t('tables.items_suffix')+'</span>':'<span class="tslot">'+t('tables.free')+'</span>';
+        div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+info2+'</div>';
+        div.addEventListener("click",function(){openOrderView(tbl.id,null);});
+        applyMesaColor(div,isOpen);
+      }
+      g.appendChild(div);
     });
   });
 }
 
+function openDoubleTablePicker(tblId){
+  var tbl=allTables().find(function(x){return x.id===tblId;});
+  var slotNames=tbl.slots||["A","B"];
+  ge("tableSlotTitle").textContent=t('tables.table')+' '+tbl.label;
+  var opts=[
+    {slot:null,label:t('tables.whole'),key:tblId},
+    {slot:0,label:slotNames[0],key:tblId+"_0"},
+    {slot:1,label:slotNames[1],key:tblId+"_1"}
+  ];
+  ge("tableSlotBtns").innerHTML=opts.map(function(o){
+    var order=openTables[o.key];
+    var info=order?(' · €'+orderTotal(order.items).toFixed(2)+' / '+order.items.length+t('tables.items_suffix')):'';
+    var status=order?'':' <span style="font-size:11px;color:#6b7280">'+t('tables.free')+'</span>';
+    return '<button class="btn-secondary" style="width:100%;text-align:left;padding:10px 14px" onclick="ge(\'tableSlotOverlay\').classList.remove(\'open\');openOrderView('+tblId+','+(o.slot===null?'null':o.slot)+')">'
+      +'<strong>'+o.label+'</strong>'+info+status+'</button>';
+  }).join("");
+  ge("tableSlotOverlay").classList.add("open");
+}
+
 function setMesasSection(id){activeMesasSection=id==="all"?"all":parseInt(id);renderMesasOverview();}
 
-function openOrderView(tableId){
-  currentOrderTableId=tableId; pendingItems=[];
+function openOrderView(tableId,slot){
+  currentOrderTableId=tableId;
+  currentOrderSlot=(slot===0||slot===1)?slot:null;
+  pendingItems=[];
   var tbl=allTables().find(function(x){return x.id===tableId;});
-  ge("orderTitle").textContent=t('tables.table')+" "+(tbl?tbl.label:tableId);
+  var label=t('tables.table')+" "+(tbl?tbl.label:tableId);
+  if(tbl&&tbl.type==="double"){
+    var slotNames=tbl.slots||["A","B"];
+    label+=currentOrderSlot!==null?' · '+slotNames[currentOrderSlot]:' ('+t('tables.whole')+')';
+  }
+  ge("orderTitle").textContent=label;
   ge("mesasOverview").style.display="none";
   ge("orderView").classList.add("active");
   renderOrderCats(); renderTicket();
@@ -30,11 +74,12 @@ function openOrderView(tableId){
 
 function closeOrderView(){
   pendingItems=[];
-  var order=openTables[currentOrderTableId];
-  if(order&&order.items.length===0) delete openTables[currentOrderTableId];
+  var key=getOrderKey(currentOrderTableId,currentOrderSlot);
+  var order=openTables[key];
+  if(order&&order.items.length===0) delete openTables[key];
   ge("mesasOverview").style.display="";
   ge("orderView").classList.remove("active");
-  currentOrderTableId=null;
+  currentOrderTableId=null; currentOrderSlot=null;
   renderMesasOverview();
 }
 
@@ -59,8 +104,9 @@ function addToOrder(artId){
 
 function confirmAddToOrder(){
   if(!pendingItems.length) return;
-  if(!openTables[currentOrderTableId]) openTables[currentOrderTableId]={items:[],openedAt:Date.now()};
-  var order=openTables[currentOrderTableId];
+  var key=getOrderKey(currentOrderTableId,currentOrderSlot);
+  if(!openTables[key]) openTables[key]={items:[],openedAt:Date.now()};
+  var order=openTables[key];
   pendingItems.forEach(function(p){
     var ex=order.items.find(function(i){return i.id===p.id;});
     if(ex) ex.qty+=p.qty;
@@ -72,7 +118,7 @@ function confirmAddToOrder(){
 }
 
 function renderTicket(){
-  var order=openTables[currentOrderTableId];
+  var order=openTables[getOrderKey(currentOrderTableId,currentOrderSlot)];
   var confirmed=order?order.items:[];
   var allItems=JSON.parse(JSON.stringify(confirmed));
   pendingItems.forEach(function(p){
@@ -108,7 +154,7 @@ function changePending(artId,delta){
 }
 
 function changeQty(artId,delta){
-  var order=openTables[currentOrderTableId]; if(!order) return;
+  var order=openTables[getOrderKey(currentOrderTableId,currentOrderSlot)]; if(!order) return;
   var it=order.items.find(function(i){return i.id===artId;});
   if(!it) return;
   it.qty+=delta;
@@ -117,18 +163,20 @@ function changeQty(artId,delta){
 }
 
 function openPayModal(){
-  var order=openTables[currentOrderTableId]; if(!order||!order.items.length) return;
+  var order=openTables[getOrderKey(currentOrderTableId,currentOrderSlot)]; if(!order||!order.items.length) return;
   ge("payTotal").textContent="€"+orderTotal(order.items).toFixed(2);
   ge("payModalSub").textContent=ge("orderTitle").textContent;
   ge("payModalOverlay").classList.add("open");
 }
 
 function closeTable(method){
-  var order=openTables[currentOrderTableId]; if(!order) return;
-  var t=allTables().find(function(x){return x.id===currentOrderTableId;});
+  var key=getOrderKey(currentOrderTableId,currentOrderSlot);
+  var order=openTables[key]; if(!order) return;
+  var tbl=allTables().find(function(x){return x.id===currentOrderTableId;});
   var sec=sections.find(function(s){return s.tables.some(function(x){return x.id===currentOrderTableId;});});
-  history24.push({tableLabel:t?t.label:currentOrderTableId,sectionName:sec?sec.name:"",total:orderTotal(order.items),method:method,closedAt:Date.now(),items:JSON.parse(JSON.stringify(order.items))});
-  delete openTables[currentOrderTableId];
+  var slotSuffix=tbl&&tbl.type==="double"?(currentOrderSlot!==null?' · '+(tbl.slots||["A","B"])[currentOrderSlot]:' ('+t('tables.whole')+')'):'';
+  history24.push({tableLabel:(tbl?tbl.label:currentOrderTableId)+slotSuffix,sectionName:sec?sec.name:"",total:orderTotal(order.items),method:method,closedAt:Date.now(),items:JSON.parse(JSON.stringify(order.items))});
+  delete openTables[key];
   ge("payModalOverlay").classList.remove("open");
   closeOrderView();
   renderHistorial();
@@ -140,9 +188,31 @@ function openTableSettings(){settingsCopy=JSON.parse(JSON.stringify(sections));r
 function renderSettingsSections(){
   ge("settingsSections").innerHTML=settingsCopy.map(function(sec){
     return '<div class="settings-section"><div class="settings-section-header"><input class="sec-rename-input" type="text" id="secname'+sec.id+'" value="'+sec.name+'"><button class="sec-btn danger" onclick="deleteSection('+sec.id+')">'+t('tables.delete_section')+'</button></div>'
-      +'<div class="settings-tables-list">'+sec.tables.map(function(tb){return '<div class="tbl-settings-row"><input class="tbl-num-inp" type="text" id="tn'+tb.id+'" value="'+tb.label+'" placeholder="'+t('res_modal.name_ph')+'"><button class="tbl-del-btn" onclick="deleteTableFromSection('+sec.id+','+tb.id+')">✕</button></div>';}).join("")
+      +'<div class="settings-tables-list">'+sec.tables.map(function(tb){
+        var isDouble=tb.type==="double";
+        var slots=tb.slots||["A","B"];
+        return '<div class="tbl-settings-row">'
+          +'<input class="tbl-num-inp" type="text" id="tn'+tb.id+'" value="'+tb.label+'" placeholder="'+t('res_modal.name_ph')+'">'
+          +'<button class="tbl-del-btn" onclick="deleteTableFromSection('+sec.id+','+tb.id+')">✕</button>'
+          +'</div>'
+          +'<div class="tbl-type-row">'
+          +'<select class="tbl-type-sel" id="ttype'+tb.id+'" onchange="toggleTableType('+tb.id+')">'
+          +'<option value="single"'+(isDouble?'':' selected')+'>'+t('tables.single')+'</option>'
+          +'<option value="double"'+(isDouble?' selected':'')+'>'+t('tables.double')+'</option>'
+          +'</select>'
+          +'</div>'
+          +'<div class="tbl-slots-row" id="tslots'+tb.id+'" style="display:'+(isDouble?'flex':'none')+';gap:6px">'
+          +'<input class="tbl-slot-inp" type="text" id="ts0_'+tb.id+'" value="'+slots[0]+'" placeholder="A">'
+          +'<input class="tbl-slot-inp" type="text" id="ts1_'+tb.id+'" value="'+slots[1]+'" placeholder="B">'
+          +'</div>';
+      }).join("")
       +'<button class="tbl-add-btn" onclick="addTableToSection('+sec.id+')">'+t('tables.add_table')+'</button></div></div>';
   }).join("");
+}
+
+function toggleTableType(tbId){
+  var sel=ge("ttype"+tbId); var row=ge("tslots"+tbId);
+  if(row) row.style.display=sel.value==="double"?"flex":"none";
 }
 
 function addSection(){var inp=ge("newSectionName");var name=inp.value.trim();if(!name)return;settingsCopy.push({id:Date.now(),name:name,tables:[]});inp.value="";renderSettingsSections();}
@@ -153,7 +223,17 @@ function deleteTableFromSection(secId,tId){var sec=settingsCopy.find(function(s)
 function saveTableSettings(){
   sections=settingsCopy.map(function(sec){
     var ne=ge("secname"+sec.id);
-    return {id:sec.id,name:ne?ne.value:sec.name,tables:sec.tables.map(function(t){var e=ge("tn"+t.id);return{id:t.id,label:e?e.value:t.label};}).filter(function(t){return t.label.trim()!="";})};
+    return {id:sec.id,name:ne?ne.value:sec.name,tables:sec.tables.map(function(tb){
+      var e=ge("tn"+tb.id);
+      var typeEl=ge("ttype"+tb.id);
+      var type=typeEl?typeEl.value:(tb.type||"single");
+      var obj={id:tb.id,label:e?e.value:tb.label,type:type};
+      if(type==="double"){
+        var s0=ge("ts0_"+tb.id); var s1=ge("ts1_"+tb.id);
+        obj.slots=[(s0&&s0.value)||"A",(s1&&s1.value)||"B"];
+      }
+      return obj;
+    }).filter(function(tb){return tb.label.trim()!="";})};
   }).filter(function(s){return s.name.trim()!="";});
   ge("settingsOverlay").classList.remove("open");
   activeMesasSection="all"; activeResSection="all";

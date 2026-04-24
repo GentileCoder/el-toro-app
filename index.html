@@ -47,6 +47,29 @@ header span{font-size:13px;color:#8b949e}
 .badge-pending{background:#3d2200;color:#fcd34d}
 .res-act-btn{padding:4px 9px;border-radius:6px;border:1px solid #21262d;background:transparent;color:#8b949e;font-size:11px;cursor:pointer;margin-left:4px}
 .res-act-btn.del{border-color:#3d0c0c;color:#fca5a5}
+.view-toggle{display:flex;gap:3px;background:#161b22;border:1px solid #21262d;border-radius:8px;padding:3px}
+.view-btn{padding:5px 11px;border-radius:6px;border:none;background:transparent;color:#8b949e;cursor:pointer;font-size:15px;line-height:1;transition:all .15s}
+.view-btn.active{background:#6366f1;color:#fff}
+.res-book-wrap{background:#161b22;border-radius:12px;border:1px solid #21262d;overflow:hidden}
+.res-tl-row{display:grid;grid-template-columns:76px repeat(3,1fr);gap:6px;padding:6px 14px;border-bottom:1px solid #21262d;align-items:stretch}
+.res-tl-row:last-child{border-bottom:none}
+.res-tl-label{font-size:13px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding-right:4px}
+.res-tl-slot{border-radius:8px;padding:8px 10px;min-height:64px}
+.res-tl-slot.filled{background:#1c2128;border:1px solid #21262d}
+.res-tl-slot.filled.whole{border-color:#6366f1}
+.res-tl-slot.blocked{background:#0d1117;border:1px dashed #21262d;opacity:0.35;display:flex;flex-direction:column;justify-content:center}
+.res-tl-slot.empty{border:1px dashed #21262d;display:flex;align-items:center;justify-content:center;color:#2d3748;cursor:pointer;font-size:20px;transition:all .15s}
+.res-tl-slot.empty:hover{border-color:#6366f1;color:#818cf8}
+.slot-time{font-size:11px;font-weight:600;color:#7ed4a7;margin-bottom:2px}
+.slot-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-foot{display:flex;align-items:center;gap:3px;margin-top:5px;flex-wrap:wrap}
+.res-book-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;padding:10px 14px 6px;background:#0d1117;border-bottom:1px solid #21262d}
+.res-book-empty td{opacity:0.35}
+.res-book-slot{display:inline-block;margin-left:5px;font-size:10px;font-weight:600;background:#21262d;color:#8b949e;padding:1px 5px;border-radius:4px;vertical-align:middle}
+.tbl-type-row{padding:0 0 4px 2px}
+.tbl-type-sel{padding:4px 8px;border-radius:6px;border:1px solid #333;background:#2a2a2a;color:#f0ece3;font-size:11px;cursor:pointer}
+.tbl-slots-row{padding:0 0 6px 2px}
+.tbl-slot-inp{width:calc(50% - 3px);padding:5px 8px;border-radius:6px;border:1px solid #333;background:#0d1117;color:#e2e8f0;font-size:12px}
 .order-view{display:none}
 .order-view.active{display:block}
 .order-back{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -178,11 +201,16 @@ header span{font-size:13px;color:#8b949e}
 <div class="content active" id="tab-reservations">
   <div class="toolbar">
     <input type="date" id="filterDate">
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="grid" onclick="setResView('grid')" title="Grid">⊞</button>
+      <button class="view-btn" data-view="book" onclick="setResView('book')" title="Book">☰</button>
+    </div>
     <button class="btn-primary" onclick="openResModal(null)" data-i18n="reservations.new">+ Nueva reserva</button>
   </div>
   <div class="section-pills" id="resSectionPills"></div>
   <div class="table-grid" id="resTableGrid"></div>
   <div id="resDetailPanel"></div>
+  <div id="resBookView" style="display:none"></div>
 </div>
 
 <!-- MESAS -->
@@ -265,7 +293,8 @@ header span{font-size:13px;color:#8b949e}
       <div><label data-i18n="res_modal.from">Desde</label><input type="time" id="mFrom" value="17:00"></div>
       <div><label data-i18n="res_modal.to">Hasta</label><input type="time" id="mTo" value="19:00"></div>
     </div>
-    <label data-i18n="res_modal.table">Mesa</label><select id="mTable"></select>
+    <label data-i18n="res_modal.table">Mesa</label><select id="mTable" onchange="updateResModalSlot()"></select>
+    <div id="mSlotRow" style="display:none"><label data-i18n="res_modal.slot">Zona</label><select id="mSlot"></select></div>
     <label data-i18n="res_modal.details">Detalles</label><textarea id="mNotes" data-i18n-ph="res_modal.details_ph" placeholder="Alergias, ocasión especial..."></textarea>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="ge('resModalOverlay').classList.remove('open')" data-i18n="modal.cancel">Cancelar</button>
@@ -303,6 +332,17 @@ header span{font-size:13px;color:#8b949e}
     </div>
     <div class="modal-actions" style="justify-content:center">
       <button class="btn-cancel" onclick="ge('payModalOverlay').classList.remove('open')" data-i18n="modal.cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TABLE SLOT PICKER -->
+<div class="modal-overlay" id="tableSlotOverlay">
+  <div class="modal" style="max-width:300px">
+    <h2 id="tableSlotTitle"></h2>
+    <div id="tableSlotBtns" style="display:flex;flex-direction:column;gap:8px;margin-top:14px"></div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="btn-cancel" onclick="ge('tableSlotOverlay').classList.remove('open')" data-i18n="modal.cancel">Cancelar</button>
     </div>
   </div>
 </div>
@@ -388,6 +428,9 @@ var TRANSLATIONS = {
     'tables.pending': '(pendiente)',
     'tables.delete_section': '✕ Sección',
     'tables.add_table': '+ Mesa',
+    'tables.single': 'Individual',
+    'tables.double': 'Doble',
+    'tables.whole': 'Mesa completa',
     'tables.table': 'Mesa',
     'tables.items_suffix': ' art.',
     'reservations.new': '+ Nueva reserva',
@@ -402,6 +445,7 @@ var TRANSLATIONS = {
     'reservations.none': 'Sin reservas',
     'reservations.singular': 'reserva',
     'reservations.plural': 'reservas',
+    'reservations.book_time': 'Hora',
     'history.empty': 'Sin actividad en las últimas 24 horas',
     'history.description': 'Mesas cerradas en las últimas 24 horas',
     'history.card': '💳 Tarjeta',
@@ -437,6 +481,7 @@ var TRANSLATIONS = {
     'modal.close': 'Cerrar',
     'modal.create': 'Crear',
     'modal.add': 'Añadir',
+    'res_modal.slot': 'Zona',
     'res_modal.title': 'Nueva reserva',
     'res_modal.name_label': 'Nombre del cliente',
     'res_modal.name_ph': 'Nombre',
@@ -501,6 +546,9 @@ var TRANSLATIONS = {
     'tables.pending': '(pending)',
     'tables.delete_section': '✕ Section',
     'tables.add_table': '+ Table',
+    'tables.single': 'Single',
+    'tables.double': 'Double',
+    'tables.whole': 'Whole table',
     'tables.table': 'Table',
     'tables.items_suffix': ' items',
     'reservations.new': '+ New reservation',
@@ -515,6 +563,7 @@ var TRANSLATIONS = {
     'reservations.none': 'No reservations',
     'reservations.singular': 'reservation',
     'reservations.plural': 'reservations',
+    'reservations.book_time': 'Time',
     'history.empty': 'No activity in the last 24 hours',
     'history.description': 'Tables closed in the last 24 hours',
     'history.card': '💳 Card',
@@ -550,6 +599,7 @@ var TRANSLATIONS = {
     'modal.close': 'Close',
     'modal.create': 'Create',
     'modal.add': 'Add',
+    'res_modal.slot': 'Slot',
     'res_modal.title': 'New reservation',
     'res_modal.name_label': 'Customer name',
     'res_modal.name_ph': 'Name',
@@ -614,6 +664,9 @@ var TRANSLATIONS = {
     'tables.pending': '(ausstehend)',
     'tables.delete_section': '✕ Bereich',
     'tables.add_table': '+ Tisch',
+    'tables.single': 'Einfach',
+    'tables.double': 'Doppelt',
+    'tables.whole': 'Ganzer Tisch',
     'tables.table': 'Tisch',
     'tables.items_suffix': ' Art.',
     'reservations.new': '+ Neue Reservierung',
@@ -628,6 +681,7 @@ var TRANSLATIONS = {
     'reservations.none': 'Keine Reservierungen',
     'reservations.singular': 'Reservierung',
     'reservations.plural': 'Reservierungen',
+    'reservations.book_time': 'Zeit',
     'history.empty': 'Keine Aktivität in den letzten 24 Stunden',
     'history.description': 'Geschlossene Tische der letzten 24 Stunden',
     'history.card': '💳 Karte',
@@ -663,6 +717,7 @@ var TRANSLATIONS = {
     'modal.close': 'Schließen',
     'modal.create': 'Erstellen',
     'modal.add': 'Hinzufügen',
+    'res_modal.slot': 'Bereich',
     'res_modal.title': 'Neue Reservierung',
     'res_modal.name_label': 'Kundenname',
     'res_modal.name_ph': 'Name',
@@ -839,7 +894,9 @@ var categories=["Comida","Bebida","Softdrink","Café","Postre","Vino","Cerveza",
 var articulos=[], editingArtId=null;
 var openTables={};
 var history24=[];
-var selectedTableId=null, activeResSection="all", activeMesasSection="all";
+var selectedTableId=null, activeResSection="all", activeMesasSection="all", activeResView="grid";
+var currentOrderSlot=null;
+function getOrderKey(tableId,slot){return (slot===0||slot===1)?tableId+'_'+slot:tableId;}
 var pendingItems=[];
 var currentOrderTableId=null;
 var planWeekOffset=0;
@@ -985,9 +1042,67 @@ function renderResTableGrid(date){
 }
 
 function renderReservationsTab(){
-  renderSectionPills("resSectionPills",activeResSection,"setResSection");
   var d=ge("filterDate").value||today();
-  renderResTableGrid(d); renderDetailPanel(d);
+  var isBook=activeResView==="book";
+  renderSectionPills("resSectionPills",activeResSection,"setResSection");
+  ge("resTableGrid").style.display=isBook?"none":"";
+  ge("resBookView").style.display=isBook?"":"none";
+  if(isBook){if(ge("resDetailPanel"))ge("resDetailPanel").innerHTML="";renderBookView(d);}
+  else{renderResTableGrid(d);renderDetailPanel(d);}
+  document.querySelectorAll(".view-btn").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-view")===activeResView);});
+}
+
+function setResView(v){activeResView=v;selectedTableId=null;renderReservationsTab();}
+
+function renderBookView(date){
+  var el=ge("resBookView");
+  var secs=activeResSection==="all"?sections:sections.filter(function(s){return s.id===activeResSection;});
+  var html='<div class="res-book-wrap">';
+  secs.forEach(function(sec){
+    if(activeResSection==="all") html+='<div class="res-book-section-label">'+sec.name+'</div>';
+    sec.tables.forEach(function(tbl){
+      var isDouble=tbl.type==="double";
+      if(isDouble){
+        var slotNames=tbl.slots||["A","B"];
+        var wholeItems=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&(r.slot===null||r.slot===undefined);}).sort(function(a,b){return a.from.localeCompare(b.from);});
+        var s0Items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&r.slot===0;}).sort(function(a,b){return a.from.localeCompare(b.from);});
+        var s1Items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&r.slot===1;}).sort(function(a,b){return a.from.localeCompare(b.from);});
+        var rowA=s0Items.map(function(r){return {r:r,blocked:false};}).concat(wholeItems.map(function(r){return {r:r,blocked:false,whole:true};})).sort(function(a,b){return a.r.from.localeCompare(b.r.from);});
+        var rowB=s1Items.map(function(r){return {r:r,blocked:false};}).concat(wholeItems.map(function(r){return {r:r,blocked:true};})).sort(function(a,b){return a.r.from.localeCompare(b.r.from);});
+        html+=renderTLRow(tbl.label,slotNames[0],rowA,tbl.id,0);
+        html+=renderTLRow(tbl.label,slotNames[1],rowB,tbl.id,1);
+      } else {
+        var items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled";}).sort(function(a,b){return a.from.localeCompare(b.from);}).map(function(r){return {r:r,blocked:false};});
+        html+=renderTLRow(tbl.label,null,items,tbl.id,null);
+      }
+    });
+  });
+  el.innerHTML=html+'</div>';
+}
+
+function renderTLRow(tblLabel,slotName,items,tblId,slot){
+  var label='<div class="res-tl-label"><strong>'+tblLabel+'</strong>'+(slotName?'<span class="res-book-slot">'+slotName+'</span>':'')+'</div>';
+  var cells='';
+  for(var i=0;i<3;i++){
+    var it=items[i];
+    if(!it){
+      cells+='<div class="res-tl-slot empty" onclick="openResModal('+tblId+','+(slot===null?'null':slot)+')">+</div>';
+    } else if(it.blocked){
+      cells+='<div class="res-tl-slot blocked"><div class="slot-time">'+it.r.from+'–'+it.r.to+'</div><div style="font-size:10px;color:#555">'+t('tables.whole')+'</div></div>';
+    } else {
+      var r=it.r;
+      cells+='<div class="res-tl-slot filled'+(it.whole?' whole':'')+'">'
+        +'<div class="slot-time">'+r.from+'–'+r.to+'</div>'
+        +'<div class="slot-name">'+r.name+(it.whole?' <span class="res-book-slot">'+t('tables.whole')+'</span>':'')+'</div>'
+        +'<div class="slot-foot">'
+        +'<span>'+r.guests+' '+t('reservations.pax')+'</span>'
+        +' <span class="res-badge badge-'+r.status+'" style="font-size:9px;padding:1px 5px">'+t(r.status==="confirmed"?"reservations.confirmed":"reservations.pending")+'</span>'
+        +' <button class="qty-btn" onclick="toggleResStatus('+r.id+')">'+(r.status==="confirmed"?"⟳":"✓")+'</button>'
+        +' <button class="qty-btn" style="color:#fca5a5" onclick="deleteRes('+r.id+')">✕</button>'
+        +'</div></div>';
+    }
+  }
+  return '<div class="res-tl-row">'+label+cells+'</div>';
 }
 
 function setResSection(id){activeResSection=id==="all"?"all":parseInt(id);selectedTableId=null;renderReservationsTab();}
@@ -1014,18 +1129,36 @@ function renderDetailPanel(d){
 function toggleResStatus(id){var r=reservations.find(function(x){return x.id===id;});if(r)r.status=r.status==="confirmed"?"pending":"confirmed";renderReservationsTab();saveToCloud();}
 function deleteRes(id){reservations=reservations.filter(function(x){return x.id!==id;});renderReservationsTab();saveToCloud();}
 
-function openResModal(tableId){
+function openResModal(tableId,slotIdx){
   var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
   ge("resModalTitle").textContent=t('res_modal.title'); ge("resModalSub").textContent=tbl?t('tables.table')+" "+tbl.label:"";
   ge("mName").value=""; ge("mGuests").value=2; ge("mDate").value=ge("filterDate").value||today();
   ge("mFrom").value="17:00"; ge("mTo").value="19:00"; ge("mNotes").value="";
   var s=ge("mTable"); s.innerHTML='<option value="">'+t('reservations.unassigned')+'</option>';
   sections.forEach(function(sec){var og=document.createElement("optgroup");og.label=sec.name;sec.tables.forEach(function(tb){var o=document.createElement("option");o.value=tb.id;o.textContent=tb.label;if(tableId===tb.id)o.selected=true;og.appendChild(o);});s.appendChild(og);});
+  updateResModalSlot(slotIdx);
   ge("resModalOverlay").classList.add("open");
 }
 
+function updateResModalSlot(preselect){
+  var tableId=parseInt(ge("mTable").value);
+  var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
+  var isDouble=tbl&&tbl.type==="double";
+  ge("mSlotRow").style.display=isDouble?"":"none";
+  if(isDouble){
+    var slots=tbl.slots||["A","B"];
+    ge("mSlot").innerHTML='<option value="null">'+t('tables.whole')+'</option>'
+      +slots.map(function(name,i){return '<option value="'+i+'">'+name+'</option>';}).join("");
+    if(preselect!==undefined&&preselect!==null) ge("mSlot").value=String(preselect);
+  }
+}
+
 function saveReservation(){
-  reservations.push({id:Date.now(),name:ge("mName").value||t('reservations.no_name'),guests:parseInt(ge("mGuests").value)||1,date:ge("mDate").value,from:ge("mFrom").value,to:ge("mTo").value,table:parseInt(ge("mTable").value)||null,notes:ge("mNotes").value,status:"confirmed"});
+  var tableId=parseInt(ge("mTable").value)||null;
+  var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
+  var slotVal=ge("mSlot").value;
+  var slot=tbl&&tbl.type==="double"?(slotVal==="null"?null:parseInt(slotVal)):null;
+  reservations.push({id:Date.now(),name:ge("mName").value||t('reservations.no_name'),guests:parseInt(ge("mGuests").value)||1,date:ge("mDate").value,from:ge("mFrom").value,to:ge("mTo").value,table:tableId,slot:slot,notes:ge("mNotes").value,status:"confirmed"});
   ge("resModalOverlay").classList.remove("open"); renderReservationsTab(); saveToCloud();
 }
 
@@ -1037,24 +1170,68 @@ function renderMesasOverview(){
   secs.forEach(function(sec){
     if(activeMesasSection==="all"){var l=document.createElement("div");l.className="section-label";l.textContent=sec.name;g.appendChild(l);}
     sec.tables.forEach(function(tbl){
-      var isOpen=!!openTables[tbl.id];
-      var order=openTables[tbl.id];
-      var total=isOpen?orderTotal(order.items):0;
       var div=document.createElement("div"); div.className="tmesa";
-      var info=isOpen?'<span class="tslot">€'+total.toFixed(2)+'</span><span class="tslot">'+order.items.length+t('tables.items_suffix')+'</span>':'<span class="tslot">'+t('tables.free')+'</span>';
-      div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+info+'</div>';
-      div.addEventListener("click",function(){openOrderView(tbl.id);});
-      applyMesaColor(div,isOpen); g.appendChild(div);
+      if(tbl.type==="double"){
+        var slotNames=tbl.slots||["A","B"];
+        var wholeOrder=openTables[tbl.id];
+        var s0Order=openTables[tbl.id+"_0"];
+        var s1Order=openTables[tbl.id+"_1"];
+        var anyOpen=!!(wholeOrder||s0Order||s1Order);
+        var info;
+        if(wholeOrder){
+          info='<span class="tslot">'+t('tables.whole')+' · €'+orderTotal(wholeOrder.items).toFixed(2)+'</span>';
+        } else {
+          info='<span class="tslot">'+slotNames[0]+': '+(s0Order?'€'+orderTotal(s0Order.items).toFixed(2):t('tables.free'))+'</span>'
+              +'<span class="tslot">'+slotNames[1]+': '+(s1Order?'€'+orderTotal(s1Order.items).toFixed(2):t('tables.free'))+'</span>';
+        }
+        div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+info+'</div>';
+        div.addEventListener("click",function(){openDoubleTablePicker(tbl.id);});
+        applyMesaColor(div,anyOpen);
+      } else {
+        var isOpen=!!openTables[tbl.id];
+        var order=openTables[tbl.id];
+        var info2=isOpen?'<span class="tslot">€'+orderTotal(order.items).toFixed(2)+'</span><span class="tslot">'+order.items.length+t('tables.items_suffix')+'</span>':'<span class="tslot">'+t('tables.free')+'</span>';
+        div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+info2+'</div>';
+        div.addEventListener("click",function(){openOrderView(tbl.id,null);});
+        applyMesaColor(div,isOpen);
+      }
+      g.appendChild(div);
     });
   });
 }
 
+function openDoubleTablePicker(tblId){
+  var tbl=allTables().find(function(x){return x.id===tblId;});
+  var slotNames=tbl.slots||["A","B"];
+  ge("tableSlotTitle").textContent=t('tables.table')+' '+tbl.label;
+  var opts=[
+    {slot:null,label:t('tables.whole'),key:tblId},
+    {slot:0,label:slotNames[0],key:tblId+"_0"},
+    {slot:1,label:slotNames[1],key:tblId+"_1"}
+  ];
+  ge("tableSlotBtns").innerHTML=opts.map(function(o){
+    var order=openTables[o.key];
+    var info=order?(' · €'+orderTotal(order.items).toFixed(2)+' / '+order.items.length+t('tables.items_suffix')):'';
+    var status=order?'':' <span style="font-size:11px;color:#6b7280">'+t('tables.free')+'</span>';
+    return '<button class="btn-secondary" style="width:100%;text-align:left;padding:10px 14px" onclick="ge(\'tableSlotOverlay\').classList.remove(\'open\');openOrderView('+tblId+','+(o.slot===null?'null':o.slot)+')">'
+      +'<strong>'+o.label+'</strong>'+info+status+'</button>';
+  }).join("");
+  ge("tableSlotOverlay").classList.add("open");
+}
+
 function setMesasSection(id){activeMesasSection=id==="all"?"all":parseInt(id);renderMesasOverview();}
 
-function openOrderView(tableId){
-  currentOrderTableId=tableId; pendingItems=[];
+function openOrderView(tableId,slot){
+  currentOrderTableId=tableId;
+  currentOrderSlot=(slot===0||slot===1)?slot:null;
+  pendingItems=[];
   var tbl=allTables().find(function(x){return x.id===tableId;});
-  ge("orderTitle").textContent=t('tables.table')+" "+(tbl?tbl.label:tableId);
+  var label=t('tables.table')+" "+(tbl?tbl.label:tableId);
+  if(tbl&&tbl.type==="double"){
+    var slotNames=tbl.slots||["A","B"];
+    label+=currentOrderSlot!==null?' · '+slotNames[currentOrderSlot]:' ('+t('tables.whole')+')';
+  }
+  ge("orderTitle").textContent=label;
   ge("mesasOverview").style.display="none";
   ge("orderView").classList.add("active");
   renderOrderCats(); renderTicket();
@@ -1062,11 +1239,12 @@ function openOrderView(tableId){
 
 function closeOrderView(){
   pendingItems=[];
-  var order=openTables[currentOrderTableId];
-  if(order&&order.items.length===0) delete openTables[currentOrderTableId];
+  var key=getOrderKey(currentOrderTableId,currentOrderSlot);
+  var order=openTables[key];
+  if(order&&order.items.length===0) delete openTables[key];
   ge("mesasOverview").style.display="";
   ge("orderView").classList.remove("active");
-  currentOrderTableId=null;
+  currentOrderTableId=null; currentOrderSlot=null;
   renderMesasOverview();
 }
 
@@ -1091,8 +1269,9 @@ function addToOrder(artId){
 
 function confirmAddToOrder(){
   if(!pendingItems.length) return;
-  if(!openTables[currentOrderTableId]) openTables[currentOrderTableId]={items:[],openedAt:Date.now()};
-  var order=openTables[currentOrderTableId];
+  var key=getOrderKey(currentOrderTableId,currentOrderSlot);
+  if(!openTables[key]) openTables[key]={items:[],openedAt:Date.now()};
+  var order=openTables[key];
   pendingItems.forEach(function(p){
     var ex=order.items.find(function(i){return i.id===p.id;});
     if(ex) ex.qty+=p.qty;
@@ -1104,7 +1283,7 @@ function confirmAddToOrder(){
 }
 
 function renderTicket(){
-  var order=openTables[currentOrderTableId];
+  var order=openTables[getOrderKey(currentOrderTableId,currentOrderSlot)];
   var confirmed=order?order.items:[];
   var allItems=JSON.parse(JSON.stringify(confirmed));
   pendingItems.forEach(function(p){
@@ -1140,7 +1319,7 @@ function changePending(artId,delta){
 }
 
 function changeQty(artId,delta){
-  var order=openTables[currentOrderTableId]; if(!order) return;
+  var order=openTables[getOrderKey(currentOrderTableId,currentOrderSlot)]; if(!order) return;
   var it=order.items.find(function(i){return i.id===artId;});
   if(!it) return;
   it.qty+=delta;
@@ -1149,18 +1328,20 @@ function changeQty(artId,delta){
 }
 
 function openPayModal(){
-  var order=openTables[currentOrderTableId]; if(!order||!order.items.length) return;
+  var order=openTables[getOrderKey(currentOrderTableId,currentOrderSlot)]; if(!order||!order.items.length) return;
   ge("payTotal").textContent="€"+orderTotal(order.items).toFixed(2);
   ge("payModalSub").textContent=ge("orderTitle").textContent;
   ge("payModalOverlay").classList.add("open");
 }
 
 function closeTable(method){
-  var order=openTables[currentOrderTableId]; if(!order) return;
-  var t=allTables().find(function(x){return x.id===currentOrderTableId;});
+  var key=getOrderKey(currentOrderTableId,currentOrderSlot);
+  var order=openTables[key]; if(!order) return;
+  var tbl=allTables().find(function(x){return x.id===currentOrderTableId;});
   var sec=sections.find(function(s){return s.tables.some(function(x){return x.id===currentOrderTableId;});});
-  history24.push({tableLabel:t?t.label:currentOrderTableId,sectionName:sec?sec.name:"",total:orderTotal(order.items),method:method,closedAt:Date.now(),items:JSON.parse(JSON.stringify(order.items))});
-  delete openTables[currentOrderTableId];
+  var slotSuffix=tbl&&tbl.type==="double"?(currentOrderSlot!==null?' · '+(tbl.slots||["A","B"])[currentOrderSlot]:' ('+t('tables.whole')+')'):'';
+  history24.push({tableLabel:(tbl?tbl.label:currentOrderTableId)+slotSuffix,sectionName:sec?sec.name:"",total:orderTotal(order.items),method:method,closedAt:Date.now(),items:JSON.parse(JSON.stringify(order.items))});
+  delete openTables[key];
   ge("payModalOverlay").classList.remove("open");
   closeOrderView();
   renderHistorial();
@@ -1172,9 +1353,31 @@ function openTableSettings(){settingsCopy=JSON.parse(JSON.stringify(sections));r
 function renderSettingsSections(){
   ge("settingsSections").innerHTML=settingsCopy.map(function(sec){
     return '<div class="settings-section"><div class="settings-section-header"><input class="sec-rename-input" type="text" id="secname'+sec.id+'" value="'+sec.name+'"><button class="sec-btn danger" onclick="deleteSection('+sec.id+')">'+t('tables.delete_section')+'</button></div>'
-      +'<div class="settings-tables-list">'+sec.tables.map(function(tb){return '<div class="tbl-settings-row"><input class="tbl-num-inp" type="text" id="tn'+tb.id+'" value="'+tb.label+'" placeholder="'+t('res_modal.name_ph')+'"><button class="tbl-del-btn" onclick="deleteTableFromSection('+sec.id+','+tb.id+')">✕</button></div>';}).join("")
+      +'<div class="settings-tables-list">'+sec.tables.map(function(tb){
+        var isDouble=tb.type==="double";
+        var slots=tb.slots||["A","B"];
+        return '<div class="tbl-settings-row">'
+          +'<input class="tbl-num-inp" type="text" id="tn'+tb.id+'" value="'+tb.label+'" placeholder="'+t('res_modal.name_ph')+'">'
+          +'<button class="tbl-del-btn" onclick="deleteTableFromSection('+sec.id+','+tb.id+')">✕</button>'
+          +'</div>'
+          +'<div class="tbl-type-row">'
+          +'<select class="tbl-type-sel" id="ttype'+tb.id+'" onchange="toggleTableType('+tb.id+')">'
+          +'<option value="single"'+(isDouble?'':' selected')+'>'+t('tables.single')+'</option>'
+          +'<option value="double"'+(isDouble?' selected':'')+'>'+t('tables.double')+'</option>'
+          +'</select>'
+          +'</div>'
+          +'<div class="tbl-slots-row" id="tslots'+tb.id+'" style="display:'+(isDouble?'flex':'none')+';gap:6px">'
+          +'<input class="tbl-slot-inp" type="text" id="ts0_'+tb.id+'" value="'+slots[0]+'" placeholder="A">'
+          +'<input class="tbl-slot-inp" type="text" id="ts1_'+tb.id+'" value="'+slots[1]+'" placeholder="B">'
+          +'</div>';
+      }).join("")
       +'<button class="tbl-add-btn" onclick="addTableToSection('+sec.id+')">'+t('tables.add_table')+'</button></div></div>';
   }).join("");
+}
+
+function toggleTableType(tbId){
+  var sel=ge("ttype"+tbId); var row=ge("tslots"+tbId);
+  if(row) row.style.display=sel.value==="double"?"flex":"none";
 }
 
 function addSection(){var inp=ge("newSectionName");var name=inp.value.trim();if(!name)return;settingsCopy.push({id:Date.now(),name:name,tables:[]});inp.value="";renderSettingsSections();}
@@ -1185,7 +1388,17 @@ function deleteTableFromSection(secId,tId){var sec=settingsCopy.find(function(s)
 function saveTableSettings(){
   sections=settingsCopy.map(function(sec){
     var ne=ge("secname"+sec.id);
-    return {id:sec.id,name:ne?ne.value:sec.name,tables:sec.tables.map(function(t){var e=ge("tn"+t.id);return{id:t.id,label:e?e.value:t.label};}).filter(function(t){return t.label.trim()!="";})};
+    return {id:sec.id,name:ne?ne.value:sec.name,tables:sec.tables.map(function(tb){
+      var e=ge("tn"+tb.id);
+      var typeEl=ge("ttype"+tb.id);
+      var type=typeEl?typeEl.value:(tb.type||"single");
+      var obj={id:tb.id,label:e?e.value:tb.label,type:type};
+      if(type==="double"){
+        var s0=ge("ts0_"+tb.id); var s1=ge("ts1_"+tb.id);
+        obj.slots=[(s0&&s0.value)||"A",(s1&&s1.value)||"B"];
+      }
+      return obj;
+    }).filter(function(tb){return tb.label.trim()!="";})};
   }).filter(function(s){return s.name.trim()!="";});
   ge("settingsOverlay").classList.remove("open");
   activeMesasSection="all"; activeResSection="all";

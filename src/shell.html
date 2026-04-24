@@ -57,11 +57,16 @@
 <div class="content active" id="tab-reservations">
   <div class="toolbar">
     <input type="date" id="filterDate">
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="grid" onclick="setResView('grid')" title="Grid">⊞</button>
+      <button class="view-btn" data-view="book" onclick="setResView('book')" title="Book">☰</button>
+    </div>
     <button class="btn-primary" onclick="openResModal(null)" data-i18n="reservations.new">+ Nueva reserva</button>
   </div>
   <div class="section-pills" id="resSectionPills"></div>
   <div class="table-grid" id="resTableGrid"></div>
   <div id="resDetailPanel"></div>
+  <div id="resBookView" style="display:none"></div>
 </div>
 
 <!-- MESAS -->
@@ -144,7 +149,8 @@
       <div><label data-i18n="res_modal.from">Desde</label><input type="time" id="mFrom" value="17:00"></div>
       <div><label data-i18n="res_modal.to">Hasta</label><input type="time" id="mTo" value="19:00"></div>
     </div>
-    <label data-i18n="res_modal.table">Mesa</label><select id="mTable"></select>
+    <label data-i18n="res_modal.table">Mesa</label><select id="mTable" onchange="updateResModalSlot()"></select>
+    <div id="mSlotRow" style="display:none"><label data-i18n="res_modal.slot">Zona</label><select id="mSlot"></select></div>
     <label data-i18n="res_modal.details">Detalles</label><textarea id="mNotes" data-i18n-ph="res_modal.details_ph" placeholder="Alergias, ocasión especial..."></textarea>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="ge('resModalOverlay').classList.remove('open')" data-i18n="modal.cancel">Cancelar</button>
@@ -182,6 +188,17 @@
     </div>
     <div class="modal-actions" style="justify-content:center">
       <button class="btn-cancel" onclick="ge('payModalOverlay').classList.remove('open')" data-i18n="modal.cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TABLE SLOT PICKER -->
+<div class="modal-overlay" id="tableSlotOverlay">
+  <div class="modal" style="max-width:300px">
+    <h2 id="tableSlotTitle"></h2>
+    <div id="tableSlotBtns" style="display:flex;flex-direction:column;gap:8px;margin-top:14px"></div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="btn-cancel" onclick="ge('tableSlotOverlay').classList.remove('open')" data-i18n="modal.cancel">Cancelar</button>
     </div>
   </div>
 </div>
