@@ -1,14 +1,14 @@
 function renderCatFilter(){
   var s=ge("artCatFilter"); if(!s) return;
   var cur=s.value;
-  s.innerHTML='<option value="">Todas las categorías</option>'+categories.map(function(c){return '<option value="'+c+'"'+(cur===c?" selected":"")+'>'+c+'</option>';}).join("");
+  s.innerHTML='<option value="">'+t('articles.all_categories')+'</option>'+categories.map(function(c){return '<option value="'+c+'"'+(cur===c?" selected":"")+'>'+c+'</option>';}).join("");
 }
 
 function renderArticulos(){
   var filter=ge("artCatFilter").value;
   var list=filter?articulos.filter(function(a){return a.cat===filter;}):articulos;
   var el=ge("artList");
-  if(!list.length){el.innerHTML='<p style="color:#666;font-size:13px;text-align:center;padding:30px">No hay artículos</p>';return;}
+  if(!list.length){el.innerHTML='<p style="color:#666;font-size:13px;text-align:center;padding:30px">'+t('articles.empty')+'</p>';return;}
   var grouped={},order=[];
   list.forEach(function(a){if(!grouped[a.cat]){grouped[a.cat]=[];order.push(a.cat);}grouped[a.cat].push(a);});
   el.innerHTML=order.map(function(cat){
@@ -27,7 +27,7 @@ function deleteCategory(i){categories.splice(i,1);renderCatList();}
 function openArtModal(id){
   editingArtId=id;
   var a=id?articulos.find(function(x){return x.id===id;}):null;
-  ge("artModalTitle").textContent=a?"Editar artículo":"Nuevo artículo";
+  ge("artModalTitle").textContent=t(a?'articles.edit_title':'articles.new_title');
   ge("artName").value=a?a.name:"";
   ge("artPrice").value=a?a.price:"";
   ge("artCat").innerHTML=categories.map(function(c){return '<option value="'+c+'"'+(a&&a.cat===c?" selected":"")+'>'+c+'</option>';}).join("");

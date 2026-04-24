@@ -16,7 +16,7 @@ function build() {
   const shell = fs.readFileSync('src/shell.html', 'utf8');
   const css = fs.readFileSync('src/style.css', 'utf8');
 
-  const jsFiles = ['auth.js', 'core.js', 'reservas.js', 'mesas.js', 'articulos.js', 'historial.js', 'plan.js', 'usuarios.js'];
+  const jsFiles = ['i18n.js', 'auth.js', 'core.js', 'reservas.js', 'mesas.js', 'articulos.js', 'historial.js', 'plan.js', 'usuarios.js'];
   const js = jsFiles.map(f => fs.readFileSync(path.join('src/js', f), 'utf8')).join('\n\n');
 
   let html = shell

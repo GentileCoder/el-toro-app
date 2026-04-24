@@ -37,7 +37,7 @@ function handleLoginSubmit() {
   ge('loginBtn').disabled = true;
   fbAuth.signInWithEmailAndPassword(email, pass)
     .catch(function() {
-      ge('loginError').textContent = 'Email o contraseña incorrectos';
+      ge('loginError').textContent = t('login.error');
       ge('loginBtn').disabled = false;
     });
 }
@@ -50,20 +50,18 @@ function applyRoleVisibility() {
   var role = window.userRole;
   var isAdmin = role === 'admin';
   var isStaff = role === 'staff';
+  var isManager = role === 'manager';
 
-  ge('tab-btn-reservations').style.display = (isAdmin || isStaff) ? '' : 'none';
-  ge('tab-btn-articulos').style.display = isAdmin ? '' : 'none';
-  ge('tab-btn-historial').style.display = (isAdmin || isStaff) ? '' : 'none';
-  ge('tab-btn-plan').style.display = isAdmin ? '' : 'none';
+  ge('tab-btn-reservations').style.display = (isAdmin || isStaff || isManager) ? '' : 'none';
+  ge('tab-btn-articulos').style.display = (isAdmin || isManager) ? '' : 'none';
+  ge('tab-btn-historial').style.display = (isAdmin || isManager) ? '' : 'none';
+  ge('tab-btn-plan').style.display = (isAdmin || isStaff || isManager) ? '' : 'none';
   ge('tab-btn-usuarios').style.display = isAdmin ? '' : 'none';
 
-  ge('cobrarBtn').style.display = (isAdmin || isStaff) ? '' : 'none';
+  ge('cobrarBtn').style.display = (isAdmin || isStaff || isManager) ? '' : 'none';
   ge('configurarBtn').style.display = isAdmin ? '' : 'none';
 
-  if (role === 'springer') {
-    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('.content').forEach(function(c) { c.classList.remove('active'); });
-    ge('tab-btn-mesas').classList.add('active');
-    ge('tab-mesas').classList.add('active');
-  }
+  var canEditPlan = isAdmin || isManager;
+  ge('planEditControls').style.display = canEditPlan ? '' : 'none';
+  ge('planGrid').style.display = canEditPlan ? '' : 'none';
 }

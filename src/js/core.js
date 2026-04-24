@@ -9,7 +9,7 @@ var currentOrderTableId=null;
 var planWeekOffset=0;
 var planData={};
 
-var DAY_NAMES=["Martes","Miércoles","Jueves","Viernes","Sábado"];
+var DAY_NAMES=["Martes","Miércoles","Jueves","Viernes","Sábado"]; // kept as storage-neutral fallback; use getDayNames() for display
 var DAY_OFFSETS=[1,2,3,4,5];
 var SLOTS={1:["Fijo","Springer 1","Springer 2"],2:["Fijo","Springer 1","Springer 2"],3:["Fijo","Springer 1","Springer 2"],4:["Fijo 1","Fijo 2","Springer"],5:["Fijo 1","Fijo 2","Springer"]};
 
@@ -30,19 +30,19 @@ function saveToCloud(){
   if(!WORKER_URL) return;
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(function(){
-    setSyncStatus("Guardando…","#f59e0b");
+    setSyncStatus(t('sync.saving'),"#f59e0b");
     var payload={sections:sections,reservations:reservations,categories:categories,articulos:articulos,planData:planData,openTables:openTables};
     var hdrs={"Content-Type":"application/json"};
     if(window.authToken) hdrs["Authorization"]="Bearer "+window.authToken;
     fetch(WORKER_URL,{method:"POST",headers:hdrs,body:JSON.stringify(payload)})
-      .then(function(){setSyncStatus("Guardado ✓","#22c55e");})
-      .catch(function(){setSyncStatus("Sin conexión","#ef4444");});
+      .then(function(){setSyncStatus(t('sync.saved'),"#22c55e");})
+      .catch(function(){setSyncStatus(t('sync.offline'),"#ef4444");});
   },800);
 }
 
 function loadFromCloud(callback){
-  if(!WORKER_URL){setSyncStatus("Sin URL","#ef4444");callback();return;}
-  setSyncStatus("Cargando…","#f59e0b");
+  if(!WORKER_URL){setSyncStatus(t('sync.no_url'),"#ef4444");callback();return;}
+  setSyncStatus(t('sync.loading'),"#f59e0b");
   var loadHdrs={};
   if(window.authToken) loadHdrs["Authorization"]="Bearer "+window.authToken;
   fetch(WORKER_URL,{headers:loadHdrs})
@@ -54,11 +54,11 @@ function loadFromCloud(callback){
       if(d.articulos&&d.articulos.length) articulos=d.articulos;
       if(d.planData) planData=d.planData;
       if(d.openTables) openTables=d.openTables;
-      setSyncStatus("Sincronizado ✓","#22c55e");
+      setSyncStatus(t('sync.synced'),"#22c55e");
       callback();
     })
     .catch(function(){
-      setSyncStatus("Sin conexión","#e87c7c");
+      setSyncStatus(t('sync.offline'),"#e87c7c");
       callback();
     });
 }
@@ -85,7 +85,7 @@ function resStatus(tableId,date){
 
 function renderSectionPills(cid,active,fn){
   var el=ge(cid);
-  var h='<button class="pill'+(active==="all"?" active":"")+'" onclick="'+fn+'(\'all\')">Todas</button>';
+  var h='<button class="pill'+(active==="all"?" active":"")+'" onclick="'+fn+'(\'all\')">'+t('tabs.all')+'</button>';
   sections.forEach(function(s){h+='<button class="pill'+(active===s.id?" active":"")+'" onclick="'+fn+'('+s.id+')">'+s.name+'</button>';});
   el.innerHTML=h;
 }
@@ -102,7 +102,7 @@ function switchTab(id,el){
 }
 
 function init(){
-  ge("headerDate").textContent=new Date().toLocaleDateString("es-DE",{weekday:"long",day:"numeric",month:"long"});
+  ge("headerDate").textContent=new Date().toLocaleDateString(getLangLocale(),{weekday:"long",day:"numeric",month:"long"});
   sections=[
     {id:1,name:"Interior",tables:[{id:101,label:"1"},{id:102,label:"2"},{id:103,label:"4"},{id:104,label:"5"},{id:105,label:"6"},{id:106,label:"7"},{id:107,label:"8"},{id:108,label:"9"},{id:109,label:"10"},{id:110,label:"11"},{id:111,label:"12"}]},
     {id:2,name:"Terraza",tables:[{id:201,label:"T1"},{id:202,label:"T2"},{id:203,label:"T3"},{id:204,label:"T4"},{id:205,label:"T5"}]},

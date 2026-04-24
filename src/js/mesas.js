@@ -4,14 +4,14 @@ function renderMesasOverview(){
   var secs=activeMesasSection==="all"?sections:sections.filter(function(s){return s.id===activeMesasSection;});
   secs.forEach(function(sec){
     if(activeMesasSection==="all"){var l=document.createElement("div");l.className="section-label";l.textContent=sec.name;g.appendChild(l);}
-    sec.tables.forEach(function(t){
-      var isOpen=!!openTables[t.id];
-      var order=openTables[t.id];
+    sec.tables.forEach(function(tbl){
+      var isOpen=!!openTables[tbl.id];
+      var order=openTables[tbl.id];
       var total=isOpen?orderTotal(order.items):0;
       var div=document.createElement("div"); div.className="tmesa";
-      var info=isOpen?'<span class="tslot">€'+total.toFixed(2)+'</span><span class="tslot">'+order.items.length+' art.</span>':'<span class="tslot">Libre</span>';
-      div.innerHTML='<span class="tid">'+t.label+'</span><div class="tslots">'+info+'</div>';
-      div.addEventListener("click",function(){openOrderView(t.id);});
+      var info=isOpen?'<span class="tslot">€'+total.toFixed(2)+'</span><span class="tslot">'+order.items.length+t('tables.items_suffix')+'</span>':'<span class="tslot">'+t('tables.free')+'</span>';
+      div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+info+'</div>';
+      div.addEventListener("click",function(){openOrderView(tbl.id);});
       applyMesaColor(div,isOpen); g.appendChild(div);
     });
   });
@@ -21,8 +21,8 @@ function setMesasSection(id){activeMesasSection=id==="all"?"all":parseInt(id);re
 
 function openOrderView(tableId){
   currentOrderTableId=tableId; pendingItems=[];
-  var t=allTables().find(function(x){return x.id===tableId;});
-  ge("orderTitle").textContent="Mesa "+(t?t.label:tableId);
+  var tbl=allTables().find(function(x){return x.id===tableId;});
+  ge("orderTitle").textContent=t('tables.table')+" "+(tbl?tbl.label:tableId);
   ge("mesasOverview").style.display="none";
   ge("orderView").classList.add("active");
   renderOrderCats(); renderTicket();
@@ -85,11 +85,11 @@ function renderTicket(){
     var inConfirmed=confirmed.find(function(c){return c.id===i.id;});
     if(inPending&&!inConfirmed) i.pending=true;
   });
-  if(!allItems.length){ge("ticketItems").innerHTML='<div style="padding:20px;text-align:center;color:#555;font-size:13px">Sin artículos</div>';ge("ticketTotal").textContent="€0.00";return;}
+  if(!allItems.length){ge("ticketItems").innerHTML='<div style="padding:20px;text-align:center;color:#555;font-size:13px">'+t('tables.no_items')+'</div>';ge("ticketTotal").textContent="€0.00";return;}
   ge("ticketItems").innerHTML=allItems.map(function(it){
     var style=it.pending?"opacity:0.55":"";
     return '<div class="ticket-row" style="'+style+'">'
-      +'<span class="trow-name">'+it.name+(it.pending?' <span style="font-size:10px;color:#e8c67c">(pendiente)</span>':'')+'</span>'
+      +'<span class="trow-name">'+it.name+(it.pending?' <span style="font-size:10px;color:#e8c67c">'+t('tables.pending')+'</span>':'')+'</span>'
       +'<div class="trow-qty">'
       +(it.pending
         ?'<button class="qty-btn" onclick="changePending('+it.id+',-1)">−</button><span style="font-size:13px;min-width:16px;text-align:center">'+it.qty+'</span><button class="qty-btn" onclick="changePending('+it.id+',1)">+</button>'
@@ -139,9 +139,9 @@ function openTableSettings(){settingsCopy=JSON.parse(JSON.stringify(sections));r
 
 function renderSettingsSections(){
   ge("settingsSections").innerHTML=settingsCopy.map(function(sec){
-    return '<div class="settings-section"><div class="settings-section-header"><input class="sec-rename-input" type="text" id="secname'+sec.id+'" value="'+sec.name+'"><button class="sec-btn danger" onclick="deleteSection('+sec.id+')">✕ Sección</button></div>'
-      +'<div class="settings-tables-list">'+sec.tables.map(function(t){return '<div class="tbl-settings-row"><input class="tbl-num-inp" type="text" id="tn'+t.id+'" value="'+t.label+'" placeholder="Nombre"><button class="tbl-del-btn" onclick="deleteTableFromSection('+sec.id+','+t.id+')">✕</button></div>';}).join("")
-      +'<button class="tbl-add-btn" onclick="addTableToSection('+sec.id+')">+ Mesa</button></div></div>';
+    return '<div class="settings-section"><div class="settings-section-header"><input class="sec-rename-input" type="text" id="secname'+sec.id+'" value="'+sec.name+'"><button class="sec-btn danger" onclick="deleteSection('+sec.id+')">'+t('tables.delete_section')+'</button></div>'
+      +'<div class="settings-tables-list">'+sec.tables.map(function(tb){return '<div class="tbl-settings-row"><input class="tbl-num-inp" type="text" id="tn'+tb.id+'" value="'+tb.label+'" placeholder="'+t('res_modal.name_ph')+'"><button class="tbl-del-btn" onclick="deleteTableFromSection('+sec.id+','+tb.id+')">✕</button></div>';}).join("")
+      +'<button class="tbl-add-btn" onclick="addTableToSection('+sec.id+')">'+t('tables.add_table')+'</button></div></div>';
   }).join("");
 }
 
