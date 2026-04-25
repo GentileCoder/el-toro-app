@@ -147,9 +147,11 @@
     <label data-i18n="res_modal.date">Fecha</label><input type="date" id="mDate">
     <div class="time-row">
       <div><label data-i18n="res_modal.from">Desde</label><input type="time" id="mFrom" value="17:00"></div>
-      <div><label data-i18n="res_modal.to">Hasta</label><input type="time" id="mTo" value="19:00"></div>
+      <div id="mToWrap"><label data-i18n="res_modal.to">Hasta</label><input type="time" id="mTo" value="19:00"></div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:6px"><label class="open-end-label"><input type="checkbox" id="mOpenEnd" onchange="toggleOpenEnd()"><span data-i18n="res_modal.open_end">Final abierto</span></label></div>
     </div>
-    <label data-i18n="res_modal.table">Mesa</label><select id="mTable" onchange="updateResModalSlot()"></select>
+    <label data-i18n="res_modal.table">Mesa</label>
+    <div id="mTablePicker" class="table-picker-wrap"></div>
     <div id="mSlotRow" style="display:none"><label data-i18n="res_modal.slot">Zona</label><select id="mSlot"></select></div>
     <label data-i18n="res_modal.details">Detalles</label><textarea id="mNotes" data-i18n-ph="res_modal.details_ph" placeholder="Alergias, ocasión especial..."></textarea>
     <div class="modal-actions">
@@ -164,7 +166,11 @@
   <div class="modal" style="width:460px">
     <h2 data-i18n="table_modal.title">Configurar mesas</h2>
     <div class="modal-sub" data-i18n="table_modal.subtitle">Organiza secciones y mesas</div>
-    <div id="settingsSections" style="max-height:360px;overflow-y:auto"></div>
+    <div class="hours-settings-row">
+      <div><label data-i18n="settings.open_time">Apertura</label><input type="time" id="settingsOpenTime"></div>
+      <div><label data-i18n="settings.close_time">Cierre</label><input type="time" id="settingsCloseTime"></div>
+    </div>
+    <div id="settingsSections" style="max-height:320px;overflow-y:auto"></div>
     <div class="add-section-row">
       <input type="text" id="newSectionName" data-i18n-ph="table_modal.new_section_ph" placeholder="Nueva sección">
       <button onclick="addSection()" data-i18n="table_modal.add_section">+ Sección</button>

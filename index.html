@@ -50,21 +50,47 @@ header span{font-size:13px;color:#8b949e}
 .view-toggle{display:flex;gap:3px;background:#161b22;border:1px solid #21262d;border-radius:8px;padding:3px}
 .view-btn{padding:5px 11px;border-radius:6px;border:none;background:transparent;color:#8b949e;cursor:pointer;font-size:15px;line-height:1;transition:all .15s}
 .view-btn.active{background:#6366f1;color:#fff}
-.res-book-wrap{background:#161b22;border-radius:12px;border:1px solid #21262d;overflow:hidden}
-.res-tl-row{display:grid;grid-template-columns:76px repeat(3,1fr);gap:6px;padding:6px 14px;border-bottom:1px solid #21262d;align-items:stretch}
-.res-tl-row:last-child{border-bottom:none}
-.res-tl-label{font-size:13px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding-right:4px}
-.res-tl-slot{border-radius:8px;padding:8px 10px;min-height:64px}
-.res-tl-slot.filled{background:#1c2128;border:1px solid #21262d}
-.res-tl-slot.filled.whole{border-color:#6366f1}
-.res-tl-slot.blocked{background:#0d1117;border:1px dashed #21262d;opacity:0.35;display:flex;flex-direction:column;justify-content:center}
-.res-tl-slot.empty{border:1px dashed #21262d;display:flex;align-items:center;justify-content:center;color:#2d3748;cursor:pointer;font-size:20px;transition:all .15s}
-.res-tl-slot.empty:hover{border-color:#6366f1;color:#818cf8}
-.slot-time{font-size:11px;font-weight:600;color:#7ed4a7;margin-bottom:2px}
-.slot-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.slot-foot{display:flex;align-items:center;gap:3px;margin-top:5px;flex-wrap:wrap}
-.res-book-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;padding:10px 14px 6px;background:#0d1117;border-bottom:1px solid #21262d}
-.res-book-empty td{opacity:0.35}
+/* Timeline book view */
+.tl-book-wrap{background:#161b22;border-radius:12px;border:1px solid #21262d;overflow:hidden}
+.tl-header{display:flex;border-bottom:2px solid #21262d}
+.tl-row{display:flex;border-bottom:1px solid #21262d;align-items:stretch}
+.tl-row:last-child{border-bottom:none}
+.tl-row.double-a{border-bottom:none}
+.tl-row.double-b{border-bottom:1px solid #21262d}
+.tl-row.tl-linked-below{border-bottom:none}
+.tl-row-label{width:80px;flex-shrink:0;padding:8px 8px 8px 14px;font-size:13px;display:flex;flex-direction:column;justify-content:center;gap:3px;border-right:1px solid #21262d}
+.tl-track-header{flex:1;position:relative;height:28px}
+.tl-tick{position:absolute;font-size:10px;color:#4b5563;transform:translateX(-50%);top:7px;white-space:nowrap;pointer-events:none}
+.tl-tick:first-child{transform:none}
+.tl-tick:last-child{transform:translateX(-100%)}
+.tl-track{flex:1;position:relative;cursor:pointer;background:transparent;transition:background .1s}
+.tl-track:hover{background:rgba(99,102,241,0.03)}
+.tl-grid-line{position:absolute;top:0;bottom:0;width:1px;background:#21262d;pointer-events:none}
+.tl-res{position:absolute;border-radius:5px;border:1px solid #2d333b;background:#232a35;padding:3px 6px;overflow:hidden;box-sizing:border-box;transition:border-color .15s;z-index:1}
+.tl-res:hover{border-color:#4f5568;z-index:2}
+.tl-res.open-end{border-right-style:dashed}
+.tl-res.whole{background:rgba(99,102,241,0.22);border-color:#6366f1}
+.tl-res.whole-b{background:rgba(99,102,241,0.22);border-color:#6366f1;pointer-events:none}
+.tl-res.multi-tbl{background:rgba(245,158,11,0.18);border-color:#d97706}
+.tl-res.no-br-bot{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent}
+.tl-res.no-br-top{border-top-left-radius:0;border-top-right-radius:0;border-top:none}
+.tl-res-time{font-size:10px;font-weight:600;color:#7ed4a7;white-space:nowrap;overflow:hidden;line-height:1.4}
+.tl-res.open-end .tl-res-time{color:#f0a04b}
+.tl-res-name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e6edf3;line-height:1.3}
+.tl-res-foot{display:flex;align-items:center;gap:3px;margin-top:2px;flex-wrap:wrap}
+/* Shared */
+.res-multi-badge{display:inline-block;margin-left:4px;font-size:9px;font-weight:700;background:#78350f;color:#fcd34d;padding:1px 5px;border-radius:4px;vertical-align:middle}
+.open-end-label{display:flex;align-items:center;gap:5px;font-size:12px;color:#8b949e;cursor:pointer;white-space:nowrap}
+.open-end-label input{accent-color:#6366f1;cursor:pointer}
+.table-picker-wrap{display:flex;flex-direction:column;gap:4px;margin-bottom:2px}
+.table-picker-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#6b7280;margin-top:4px}
+.table-picker-row{display:flex;flex-wrap:wrap;gap:6px}
+.table-picker-pill{padding:4px 10px;border-radius:6px;border:1px solid #333;background:#1c2128;color:#8b949e;font-size:12px;cursor:pointer;transition:all .15s}
+.table-picker-pill:hover{border-color:#6366f1;color:#a5b4fc}
+.table-picker-pill.sel{background:#312e81;border-color:#6366f1;color:#c7d2fe;font-weight:600}
+.hours-settings-row{display:flex;gap:12px;margin-bottom:12px}
+.hours-settings-row>div{flex:1}
+.res-book-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;padding:8px 14px 6px;background:#0d1117;border-bottom:1px solid #21262d}
 .res-book-slot{display:inline-block;margin-left:5px;font-size:10px;font-weight:600;background:#21262d;color:#8b949e;padding:1px 5px;border-radius:4px;vertical-align:middle}
 .tbl-type-row{padding:0 0 4px 2px}
 .tbl-type-sel{padding:4px 8px;border-radius:6px;border:1px solid #333;background:#2a2a2a;color:#f0ece3;font-size:11px;cursor:pointer}
@@ -291,9 +317,11 @@ header span{font-size:13px;color:#8b949e}
     <label data-i18n="res_modal.date">Fecha</label><input type="date" id="mDate">
     <div class="time-row">
       <div><label data-i18n="res_modal.from">Desde</label><input type="time" id="mFrom" value="17:00"></div>
-      <div><label data-i18n="res_modal.to">Hasta</label><input type="time" id="mTo" value="19:00"></div>
+      <div id="mToWrap"><label data-i18n="res_modal.to">Hasta</label><input type="time" id="mTo" value="19:00"></div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:6px"><label class="open-end-label"><input type="checkbox" id="mOpenEnd" onchange="toggleOpenEnd()"><span data-i18n="res_modal.open_end">Final abierto</span></label></div>
     </div>
-    <label data-i18n="res_modal.table">Mesa</label><select id="mTable" onchange="updateResModalSlot()"></select>
+    <label data-i18n="res_modal.table">Mesa</label>
+    <div id="mTablePicker" class="table-picker-wrap"></div>
     <div id="mSlotRow" style="display:none"><label data-i18n="res_modal.slot">Zona</label><select id="mSlot"></select></div>
     <label data-i18n="res_modal.details">Detalles</label><textarea id="mNotes" data-i18n-ph="res_modal.details_ph" placeholder="Alergias, ocasión especial..."></textarea>
     <div class="modal-actions">
@@ -308,7 +336,11 @@ header span{font-size:13px;color:#8b949e}
   <div class="modal" style="width:460px">
     <h2 data-i18n="table_modal.title">Configurar mesas</h2>
     <div class="modal-sub" data-i18n="table_modal.subtitle">Organiza secciones y mesas</div>
-    <div id="settingsSections" style="max-height:360px;overflow-y:auto"></div>
+    <div class="hours-settings-row">
+      <div><label data-i18n="settings.open_time">Apertura</label><input type="time" id="settingsOpenTime"></div>
+      <div><label data-i18n="settings.close_time">Cierre</label><input type="time" id="settingsCloseTime"></div>
+    </div>
+    <div id="settingsSections" style="max-height:320px;overflow-y:auto"></div>
     <div class="add-section-row">
       <input type="text" id="newSectionName" data-i18n-ph="table_modal.new_section_ph" placeholder="Nueva sección">
       <button onclick="addSection()" data-i18n="table_modal.add_section">+ Sección</button>
@@ -489,9 +521,12 @@ var TRANSLATIONS = {
     'res_modal.date': 'Fecha',
     'res_modal.from': 'Desde',
     'res_modal.to': 'Hasta',
+    'res_modal.open_end': 'Final abierto',
     'res_modal.table': 'Mesa',
     'res_modal.details': 'Detalles',
     'res_modal.details_ph': 'Alergias, ocasión especial...',
+    'settings.open_time': 'Apertura',
+    'settings.close_time': 'Cierre',
     'table_modal.title': 'Configurar mesas',
     'table_modal.subtitle': 'Organiza secciones y mesas',
     'table_modal.new_section_ph': 'Nueva sección',
@@ -607,9 +642,12 @@ var TRANSLATIONS = {
     'res_modal.date': 'Date',
     'res_modal.from': 'From',
     'res_modal.to': 'To',
+    'res_modal.open_end': 'Open end',
     'res_modal.table': 'Table',
     'res_modal.details': 'Details',
     'res_modal.details_ph': 'Allergies, special occasion...',
+    'settings.open_time': 'Opens',
+    'settings.close_time': 'Closes',
     'table_modal.title': 'Configure tables',
     'table_modal.subtitle': 'Organize sections and tables',
     'table_modal.new_section_ph': 'New section',
@@ -725,9 +763,12 @@ var TRANSLATIONS = {
     'res_modal.date': 'Datum',
     'res_modal.from': 'Von',
     'res_modal.to': 'Bis',
+    'res_modal.open_end': 'Offenes Ende',
     'res_modal.table': 'Tisch',
     'res_modal.details': 'Details',
     'res_modal.details_ph': 'Allergien, besonderer Anlass...',
+    'settings.open_time': 'Öffnet',
+    'settings.close_time': 'Schließt',
     'table_modal.title': 'Tische konfigurieren',
     'table_modal.subtitle': 'Bereiche und Tische organisieren',
     'table_modal.new_section_ph': 'Neuer Bereich',
@@ -896,6 +937,8 @@ var openTables={};
 var history24=[];
 var selectedTableId=null, activeResSection="all", activeMesasSection="all", activeResView="grid";
 var currentOrderSlot=null;
+var selectedModalTables=[];
+var restaurantHours={open:"12:00",close:"23:00"};
 function getOrderKey(tableId,slot){return (slot===0||slot===1)?tableId+'_'+slot:tableId;}
 var pendingItems=[];
 var currentOrderTableId=null;
@@ -912,6 +955,9 @@ var saveTimeout=null;
 function ge(id){return document.getElementById(id);}
 function today(){return new Date().toISOString().split("T")[0];}
 function allTables(){return sections.reduce(function(a,s){return a.concat(s.tables);},[]);}
+function resTableIds(r){return r.tables||(r.table!=null?[r.table]:[]);}
+function timeToMinutes(s){var p=s.split(':');return +p[0]*60+ +p[1];}
+function minutesToTime(m){var h=Math.floor(m/60),mm=m%60;return(h<10?'0':'')+h+':'+(mm<10?'0':'')+mm;}
 function orderTotal(items){return items.reduce(function(s,i){return s+i.price*i.qty;},0);}
 
 function setSyncStatus(msg,color){
@@ -924,7 +970,7 @@ function saveToCloud(){
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(function(){
     setSyncStatus(t('sync.saving'),"#f59e0b");
-    var payload={sections:sections,reservations:reservations,categories:categories,articulos:articulos,planData:planData,openTables:openTables};
+    var payload={sections:sections,reservations:reservations,categories:categories,articulos:articulos,planData:planData,openTables:openTables,restaurantHours:restaurantHours};
     var hdrs={"Content-Type":"application/json"};
     if(window.authToken) hdrs["Authorization"]="Bearer "+window.authToken;
     fetch(WORKER_URL,{method:"POST",headers:hdrs,body:JSON.stringify(payload)})
@@ -947,6 +993,7 @@ function loadFromCloud(callback){
       if(d.articulos&&d.articulos.length) articulos=d.articulos;
       if(d.planData) planData=d.planData;
       if(d.openTables) openTables=d.openTables;
+      if(d.restaurantHours) restaurantHours=d.restaurantHours;
       setSyncStatus(t('sync.synced'),"#22c55e");
       callback();
     })
@@ -971,7 +1018,7 @@ function applyMesaColor(el,isOpen){
   el.querySelectorAll(".tid,.tslot").forEach(function(c){c.style.setProperty("color",fg,"important");});
 }
 function resStatus(tableId,date){
-  var rs=reservations.filter(function(r){return r.table===tableId&&r.date===date&&r.status!=="cancelled";});
+  var rs=reservations.filter(function(r){return resTableIds(r).indexOf(tableId)!==-1&&r.date===date&&r.status!=="cancelled";});
   if(!rs.length) return "free";
   return rs.length===1?"once":"multi";
 }
@@ -1030,11 +1077,11 @@ function renderResTableGrid(date){
   secs.forEach(function(sec){
     if(activeResSection==="all"){var l=document.createElement("div");l.className="section-label";l.textContent=sec.name;g.appendChild(l);}
     sec.tables.forEach(function(tbl){
-      var rs=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled";}).sort(function(a,b){return a.from.localeCompare(b.from);});
+      var rs=reservations.filter(function(r){return resTableIds(r).indexOf(tbl.id)!==-1&&r.date===date&&r.status!=="cancelled";}).sort(function(a,b){return a.from.localeCompare(b.from);});
       var st=resStatus(tbl.id,date);
       var div=document.createElement("div"); div.className="tmesa";
       if(selectedTableId===tbl.id) div.style.outline="2px solid #fff";
-      div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+(rs.length?rs.map(function(r){return '<span class="tslot">'+r.from+'–'+r.to+'</span>';}).join(""):'<span class="tslot">'+t('reservations.free')+'</span>')+'</div>';
+      div.innerHTML='<span class="tid">'+tbl.label+'</span><div class="tslots">'+(rs.length?rs.map(function(r){return '<span class="tslot">'+(r.openEnd?r.from+' →':r.from+'–'+r.to)+'</span>';}).join(""):'<span class="tslot">'+t('reservations.free')+'</span>')+'</div>';
       div.addEventListener("click",function(){selectedTableId=selectedTableId===tbl.id?null:tbl.id;renderReservationsTab();});
       applyResColor(div,st); g.appendChild(div);
     });
@@ -1054,55 +1101,113 @@ function renderReservationsTab(){
 
 function setResView(v){activeResView=v;selectedTableId=null;renderReservationsTab();}
 
+function calcLanes(items,closeMin){
+  var laneEnds=[];
+  items.forEach(function(r){
+    var fromM=timeToMinutes(r.from);
+    var toM=r.openEnd?closeMin:timeToMinutes(r.to);
+    var lane=-1;
+    for(var i=0;i<laneEnds.length;i++){if(fromM>=laneEnds[i]){lane=i;break;}}
+    if(lane===-1){lane=laneEnds.length;laneEnds.push(0);}
+    r._lane=lane; laneEnds[lane]=toM;
+  });
+  return Math.max(1,laneEnds.length);
+}
+
 function renderBookView(date){
   var el=ge("resBookView");
+  var openMin=timeToMinutes(restaurantHours.open);
+  var closeMin=timeToMinutes(restaurantHours.close);
+  var span=closeMin-openMin;
+  if(span<=0){el.innerHTML='';return;}
   var secs=activeResSection==="all"?sections:sections.filter(function(s){return s.id===activeResSection;});
-  var html='<div class="res-book-wrap">';
+
+  // Pass 1 — build row data
+  var rows=[];
   secs.forEach(function(sec){
-    if(activeResSection==="all") html+='<div class="res-book-section-label">'+sec.name+'</div>';
+    var secLabel=activeResSection==="all"?sec.name:null;
+    var firstInSec=true;
     sec.tables.forEach(function(tbl){
-      var isDouble=tbl.type==="double";
-      if(isDouble){
-        var slotNames=tbl.slots||["A","B"];
-        var wholeItems=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&(r.slot===null||r.slot===undefined);}).sort(function(a,b){return a.from.localeCompare(b.from);});
-        var s0Items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&r.slot===0;}).sort(function(a,b){return a.from.localeCompare(b.from);});
-        var s1Items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled"&&r.slot===1;}).sort(function(a,b){return a.from.localeCompare(b.from);});
-        var rowA=s0Items.map(function(r){return {r:r,blocked:false};}).concat(wholeItems.map(function(r){return {r:r,blocked:false,whole:true};})).sort(function(a,b){return a.r.from.localeCompare(b.r.from);});
-        var rowB=s1Items.map(function(r){return {r:r,blocked:false};}).concat(wholeItems.map(function(r){return {r:r,blocked:true};})).sort(function(a,b){return a.r.from.localeCompare(b.r.from);});
-        html+=renderTLRow(tbl.label,slotNames[0],rowA,tbl.id,0);
-        html+=renderTLRow(tbl.label,slotNames[1],rowB,tbl.id,1);
+      var all=reservations.filter(function(r){return resTableIds(r).indexOf(tbl.id)!==-1&&r.date===date&&r.status!=="cancelled";});
+      var secName=firstInSec?secLabel:null;
+      firstInSec=false;
+      if(tbl.type==="double"){
+        var sn=tbl.slots||["A","B"];
+        var whole=all.filter(function(r){return r.slot===null||r.slot===undefined;});
+        var s0=all.filter(function(r){return r.slot===0;});
+        var s1=all.filter(function(r){return r.slot===1;});
+        rows.push({secName:secName,tblLabel:tbl.label,slotName:sn[0],tblId:tbl.id,slot:0,rc:'double-a',
+          items:s0.map(function(r){return Object.assign({},r);}).concat(whole.map(function(r){return Object.assign({},r,{_wholeRow:'a'});}))});
+        rows.push({secName:null,tblLabel:tbl.label,slotName:sn[1],tblId:tbl.id,slot:1,rc:'double-b',
+          items:s1.map(function(r){return Object.assign({},r);}).concat(whole.map(function(r){return Object.assign({},r,{_wholeRow:'b'});}))});
       } else {
-        var items=reservations.filter(function(r){return r.table===tbl.id&&r.date===date&&r.status!=="cancelled";}).sort(function(a,b){return a.from.localeCompare(b.from);}).map(function(r){return {r:r,blocked:false};});
-        html+=renderTLRow(tbl.label,null,items,tbl.id,null);
+        rows.push({secName:secName,tblLabel:tbl.label,slotName:null,tblId:tbl.id,slot:null,rc:'',
+          items:all.map(function(r){return Object.assign({},r);})});
       }
     });
+  });
+
+  // Pass 2 — detect adjacency for multi-table reservations
+  for(var i=0;i<rows.length-1;i++){
+    var cur=rows[i], nxt=rows[i+1];
+    var curIds=cur.items.filter(function(r){return resTableIds(r).length>1&&r._wholeRow!=='b';}).map(function(r){return r.id;});
+    var nxtIds=nxt.items.filter(function(r){return resTableIds(r).length>1&&r._wholeRow!=='b';}).map(function(r){return r.id;});
+    var shared=curIds.filter(function(id){return nxtIds.indexOf(id)!==-1;});
+    if(shared.length){cur.connBelow=shared; nxt.connAbove=shared;}
+  }
+
+  // Pass 3 — render
+  var ticks='';
+  for(var h=openMin;h<=closeMin;h+=60){var p=(h-openMin)/span*100;ticks+='<div class="tl-tick" style="left:'+p.toFixed(1)+'%">'+minutesToTime(h)+'</div>';}
+  var html='<div class="tl-book-wrap"><div class="tl-header"><div class="tl-row-label"></div><div class="tl-track-header">'+ticks+'</div></div>';
+  rows.forEach(function(row){
+    if(row.secName) html+='<div class="res-book-section-label">'+row.secName+'</div>';
+    html+=renderTLRow(row,openMin,closeMin,span);
   });
   el.innerHTML=html+'</div>';
 }
 
-function renderTLRow(tblLabel,slotName,items,tblId,slot){
-  var label='<div class="res-tl-label"><strong>'+tblLabel+'</strong>'+(slotName?'<span class="res-book-slot">'+slotName+'</span>':'')+'</div>';
-  var cells='';
-  for(var i=0;i<3;i++){
-    var it=items[i];
-    if(!it){
-      cells+='<div class="res-tl-slot empty" onclick="openResModal('+tblId+','+(slot===null?'null':slot)+')">+</div>';
-    } else if(it.blocked){
-      cells+='<div class="res-tl-slot blocked"><div class="slot-time">'+it.r.from+'–'+it.r.to+'</div><div style="font-size:10px;color:#555">'+t('tables.whole')+'</div></div>';
-    } else {
-      var r=it.r;
-      cells+='<div class="res-tl-slot filled'+(it.whole?' whole':'')+'">'
-        +'<div class="slot-time">'+r.from+'–'+r.to+'</div>'
-        +'<div class="slot-name">'+r.name+(it.whole?' <span class="res-book-slot">'+t('tables.whole')+'</span>':'')+'</div>'
-        +'<div class="slot-foot">'
-        +'<span>'+r.guests+' '+t('reservations.pax')+'</span>'
-        +' <span class="res-badge badge-'+r.status+'" style="font-size:9px;padding:1px 5px">'+t(r.status==="confirmed"?"reservations.confirmed":"reservations.pending")+'</span>'
-        +' <button class="qty-btn" onclick="toggleResStatus('+r.id+')">'+(r.status==="confirmed"?"⟳":"✓")+'</button>'
-        +' <button class="qty-btn" style="color:#fca5a5" onclick="deleteRes('+r.id+')">✕</button>'
-        +'</div></div>';
+function renderTLRow(row,openMin,closeMin,span){
+  var rc=row.rc||'';
+  if(row.connBelow&&rc.indexOf('double-a')===-1) rc=(rc+' tl-linked-below').trim();
+  var sorted=row.items.sort(function(a,b){return a.from.localeCompare(b.from);});
+  var laneCount=calcLanes(sorted,closeMin);
+  var trackH=laneCount*72;
+  var label='<div class="tl-row-label"><strong>'+row.tblLabel+'</strong>'+(row.slotName?'<span class="res-book-slot">'+row.slotName+'</span>':'')+'</div>';
+  var gridLines='';
+  for(var h=openMin+60;h<closeMin;h+=60){var p=(h-openMin)/span*100;gridLines+='<div class="tl-grid-line" style="left:'+p.toFixed(1)+'%"></div>';}
+  var bars=sorted.map(function(r){
+    var fromM=timeToMinutes(r.from);
+    var toM=r.openEnd?closeMin:timeToMinutes(r.to);
+    var left=Math.max(0,(fromM-openMin)/span*100);
+    var width=Math.max(0.5,Math.min(100-left,(toM-fromM)/span*100));
+    var topPct=r._lane/laneCount*100;
+    var hPct=1/laneCount*100;
+    var isWholeB=r._wholeRow==='b';
+    var isWhole=r._wholeRow!==undefined;
+    var otherIds=resTableIds(r).filter(function(id){return id!==row.tblId;});
+    var isMulti=otherIds.length>0;
+    var otherLabels=otherIds.map(function(id){var tb=allTables().find(function(x){return x.id===id;});return tb?tb.label:id;}).join(', ');
+    var noBot=isWhole&&r._wholeRow==='a'||(row.connBelow&&row.connBelow.indexOf(r.id)!==-1);
+    var noTop=isWholeB||(row.connAbove&&row.connAbove.indexOf(r.id)!==-1);
+    var cls='tl-res'+(r.openEnd?' open-end':'')+(isWhole?' whole':'')+(isWholeB?' whole-b':'')+(isMulti?' multi-tbl':'')+(noBot?' no-br-bot':'')+(noTop?' no-br-top':'');
+    var timeStr=r.openEnd?r.from+' →':r.from+'–'+r.to;
+    var style='left:'+left.toFixed(2)+'%;width:'+width.toFixed(2)+'%;top:'+topPct.toFixed(2)+'%;height:'+hPct.toFixed(2)+'%';
+    if(isWholeB||noTop){
+      return '<div class="'+cls+'" style="'+style+'" onclick="event.stopPropagation()"></div>';
     }
-  }
-  return '<div class="res-tl-row">'+label+cells+'</div>';
+    return '<div class="'+cls+'" style="'+style+'" onclick="event.stopPropagation()">'
+      +'<div class="tl-res-time">'+timeStr+(isMulti?' <span class="res-multi-badge">+'+otherLabels+'</span>':'')+'</div>'
+      +'<div class="tl-res-name">'+r.name+' · '+r.guests+' '+t('reservations.pax')+'</div>'
+      +'<div class="tl-res-foot">'
+      +'<span class="res-badge badge-'+r.status+'" style="font-size:9px;padding:1px 4px">'+t(r.status==="confirmed"?"reservations.confirmed":"reservations.pending")+'</span>'
+      +' <button class="qty-btn" onclick="toggleResStatus('+r.id+')">'+(r.status==="confirmed"?"⟳":"✓")+'</button>'
+      +' <button class="qty-btn" style="color:#fca5a5" onclick="deleteRes('+r.id+')">✕</button>'
+      +'</div></div>';
+  }).join('');
+  var clickSlot=row.slot===null?'null':row.slot;
+  var track='<div class="tl-track" style="height:'+trackH+'px" onclick="openResModal('+row.tblId+','+clickSlot+')">'+gridLines+bars+'</div>';
+  return '<div class="tl-row'+(rc?' '+rc:'')+'">' +label+track+'</div>';
 }
 
 function setResSection(id){activeResSection=id==="all"?"all":parseInt(id);selectedTableId=null;renderReservationsTab();}
@@ -1112,9 +1217,10 @@ function renderDetailPanel(d){
   if(!selectedTableId){panel.innerHTML="";return;}
   var tbl=allTables().find(function(x){return x.id===selectedTableId;});
   var sec=sections.find(function(s){return s.tables.some(function(x){return x.id===selectedTableId;});});
-  var rs=reservations.filter(function(r){return r.table===selectedTableId&&r.date===d;}).sort(function(a,b){return a.from.localeCompare(b.from);});
+  var rs=reservations.filter(function(r){return resTableIds(r).indexOf(selectedTableId)!==-1&&r.date===d;}).sort(function(a,b){return a.from.localeCompare(b.from);});
   var rows=rs.length?rs.map(function(r){
-    return '<div class="res-row"><div><h4 style="font-size:13px;font-weight:600">'+r.name+' · '+r.guests+' '+t('reservations.pax')+' · '+r.from+'–'+r.to+'</h4>'
+    var timeDisp=r.openEnd?r.from+' →':r.from+'–'+r.to;
+    return '<div class="res-row"><div><h4 style="font-size:13px;font-weight:600">'+r.name+' · '+r.guests+' '+t('reservations.pax')+' · '+timeDisp+'</h4>'
       +'<p style="font-size:11px;color:#aaa;margin-top:2px">'+(r.notes||t('reservations.no_details'))+'</p></div>'
       +'<div style="display:flex;align-items:center;gap:6px"><span class="res-badge badge-'+r.status+'">'+t(r.status==="confirmed"?'reservations.confirmed':'reservations.pending')+'</span>'
       +'<button class="res-act-btn" onclick="toggleResStatus('+r.id+')">'+(r.status==="confirmed"?"⟳":"✓")+'</button>'
@@ -1129,23 +1235,46 @@ function renderDetailPanel(d){
 function toggleResStatus(id){var r=reservations.find(function(x){return x.id===id;});if(r)r.status=r.status==="confirmed"?"pending":"confirmed";renderReservationsTab();saveToCloud();}
 function deleteRes(id){reservations=reservations.filter(function(x){return x.id!==id;});renderReservationsTab();saveToCloud();}
 
+function toggleOpenEnd(){var open=ge("mOpenEnd").checked;ge("mToWrap").style.display=open?"none":"";}
+
 function openResModal(tableId,slotIdx){
-  var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
-  ge("resModalTitle").textContent=t('res_modal.title'); ge("resModalSub").textContent=tbl?t('tables.table')+" "+tbl.label:"";
+  ge("resModalTitle").textContent=t('res_modal.title');
+  ge("resModalSub").textContent="";
   ge("mName").value=""; ge("mGuests").value=2; ge("mDate").value=ge("filterDate").value||today();
   ge("mFrom").value="17:00"; ge("mTo").value="19:00"; ge("mNotes").value="";
-  var s=ge("mTable"); s.innerHTML='<option value="">'+t('reservations.unassigned')+'</option>';
-  sections.forEach(function(sec){var og=document.createElement("optgroup");og.label=sec.name;sec.tables.forEach(function(tb){var o=document.createElement("option");o.value=tb.id;o.textContent=tb.label;if(tableId===tb.id)o.selected=true;og.appendChild(o);});s.appendChild(og);});
-  updateResModalSlot(slotIdx);
+  ge("mOpenEnd").checked=false; ge("mToWrap").style.display="";
+  selectedModalTables=tableId?[tableId]:[];
+  renderModalTablePicker(slotIdx);
   ge("resModalOverlay").classList.add("open");
 }
 
+function renderModalTablePicker(preselect){
+  var html='';
+  sections.forEach(function(sec){
+    html+='<div class="table-picker-section">'+sec.name+'</div><div class="table-picker-row">';
+    sec.tables.forEach(function(tb){
+      var sel=selectedModalTables.indexOf(tb.id)!==-1;
+      html+='<button type="button" class="table-picker-pill'+(sel?' sel':'')+'" onclick="toggleModalTable('+tb.id+')">'+tb.label+'</button>';
+    });
+    html+='</div>';
+  });
+  ge("mTablePicker").innerHTML=html;
+  updateResModalSlot(preselect);
+}
+
+function toggleModalTable(id){
+  var idx=selectedModalTables.indexOf(id);
+  if(idx===-1) selectedModalTables.push(id);
+  else selectedModalTables.splice(idx,1);
+  renderModalTablePicker();
+}
+
 function updateResModalSlot(preselect){
-  var tableId=parseInt(ge("mTable").value);
-  var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
+  var showSlot=selectedModalTables.length===1;
+  var tbl=showSlot?allTables().find(function(x){return x.id===selectedModalTables[0];}):null;
   var isDouble=tbl&&tbl.type==="double";
-  ge("mSlotRow").style.display=isDouble?"":"none";
-  if(isDouble){
+  ge("mSlotRow").style.display=(showSlot&&isDouble)?"":"none";
+  if(showSlot&&isDouble){
     var slots=tbl.slots||["A","B"];
     ge("mSlot").innerHTML='<option value="null">'+t('tables.whole')+'</option>'
       +slots.map(function(name,i){return '<option value="'+i+'">'+name+'</option>';}).join("");
@@ -1154,11 +1283,14 @@ function updateResModalSlot(preselect){
 }
 
 function saveReservation(){
-  var tableId=parseInt(ge("mTable").value)||null;
-  var tbl=tableId?allTables().find(function(x){return x.id===tableId;}):null;
+  var tables=selectedModalTables.slice();
+  var tableId=tables[0]||null;
+  var tbl=tables.length===1?allTables().find(function(x){return x.id===tableId;}):null;
   var slotVal=ge("mSlot").value;
-  var slot=tbl&&tbl.type==="double"?(slotVal==="null"?null:parseInt(slotVal)):null;
-  reservations.push({id:Date.now(),name:ge("mName").value||t('reservations.no_name'),guests:parseInt(ge("mGuests").value)||1,date:ge("mDate").value,from:ge("mFrom").value,to:ge("mTo").value,table:tableId,slot:slot,notes:ge("mNotes").value,status:"confirmed"});
+  var slot=tbl&&tbl.type==="double"&&tables.length===1?(slotVal==="null"?null:parseInt(slotVal)):null;
+  var openEnd=ge("mOpenEnd").checked;
+  var toVal=openEnd?"23:59":ge("mTo").value;
+  reservations.push({id:Date.now(),name:ge("mName").value||t('reservations.no_name'),guests:parseInt(ge("mGuests").value)||1,date:ge("mDate").value,from:ge("mFrom").value,to:toVal,openEnd:openEnd,tables:tables,table:tableId,slot:slot,notes:ge("mNotes").value,status:"confirmed"});
   ge("resModalOverlay").classList.remove("open"); renderReservationsTab(); saveToCloud();
 }
 
@@ -1348,7 +1480,7 @@ function closeTable(method){
   saveToCloud();
 }
 
-function openTableSettings(){settingsCopy=JSON.parse(JSON.stringify(sections));renderSettingsSections();ge("settingsOverlay").classList.add("open");}
+function openTableSettings(){settingsCopy=JSON.parse(JSON.stringify(sections));renderSettingsSections();ge("settingsOpenTime").value=restaurantHours.open;ge("settingsCloseTime").value=restaurantHours.close;ge("settingsOverlay").classList.add("open");}
 
 function renderSettingsSections(){
   ge("settingsSections").innerHTML=settingsCopy.map(function(sec){
@@ -1400,6 +1532,9 @@ function saveTableSettings(){
       return obj;
     }).filter(function(tb){return tb.label.trim()!="";})};
   }).filter(function(s){return s.name.trim()!="";});
+  var ot=ge("settingsOpenTime").value; var ct=ge("settingsCloseTime").value;
+  if(ot) restaurantHours.open=ot;
+  if(ct) restaurantHours.close=ct;
   ge("settingsOverlay").classList.remove("open");
   activeMesasSection="all"; activeResSection="all";
   renderMesasOverview(); renderReservationsTab(); saveToCloud();

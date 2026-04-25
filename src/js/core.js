@@ -5,6 +5,8 @@ var openTables={};
 var history24=[];
 var selectedTableId=null, activeResSection="all", activeMesasSection="all", activeResView="grid";
 var currentOrderSlot=null;
+var selectedModalTables=[];
+var restaurantHours={open:"12:00",close:"23:00"};
 function getOrderKey(tableId,slot){return (slot===0||slot===1)?tableId+'_'+slot:tableId;}
 var pendingItems=[];
 var currentOrderTableId=null;
@@ -21,6 +23,9 @@ var saveTimeout=null;
 function ge(id){return document.getElementById(id);}
 function today(){return new Date().toISOString().split("T")[0];}
 function allTables(){return sections.reduce(function(a,s){return a.concat(s.tables);},[]);}
+function resTableIds(r){return r.tables||(r.table!=null?[r.table]:[]);}
+function timeToMinutes(s){var p=s.split(':');return +p[0]*60+ +p[1];}
+function minutesToTime(m){var h=Math.floor(m/60),mm=m%60;return(h<10?'0':'')+h+':'+(mm<10?'0':'')+mm;}
 function orderTotal(items){return items.reduce(function(s,i){return s+i.price*i.qty;},0);}
 
 function setSyncStatus(msg,color){
@@ -33,7 +38,7 @@ function saveToCloud(){
   clearTimeout(saveTimeout);
   saveTimeout=setTimeout(function(){
     setSyncStatus(t('sync.saving'),"#f59e0b");
-    var payload={sections:sections,reservations:reservations,categories:categories,articulos:articulos,planData:planData,openTables:openTables};
+    var payload={sections:sections,reservations:reservations,categories:categories,articulos:articulos,planData:planData,openTables:openTables,restaurantHours:restaurantHours};
     var hdrs={"Content-Type":"application/json"};
     if(window.authToken) hdrs["Authorization"]="Bearer "+window.authToken;
     fetch(WORKER_URL,{method:"POST",headers:hdrs,body:JSON.stringify(payload)})
@@ -56,6 +61,7 @@ function loadFromCloud(callback){
       if(d.articulos&&d.articulos.length) articulos=d.articulos;
       if(d.planData) planData=d.planData;
       if(d.openTables) openTables=d.openTables;
+      if(d.restaurantHours) restaurantHours=d.restaurantHours;
       setSyncStatus(t('sync.synced'),"#22c55e");
       callback();
     })
@@ -80,7 +86,7 @@ function applyMesaColor(el,isOpen){
   el.querySelectorAll(".tid,.tslot").forEach(function(c){c.style.setProperty("color",fg,"important");});
 }
 function resStatus(tableId,date){
-  var rs=reservations.filter(function(r){return r.table===tableId&&r.date===date&&r.status!=="cancelled";});
+  var rs=reservations.filter(function(r){return resTableIds(r).indexOf(tableId)!==-1&&r.date===date&&r.status!=="cancelled";});
   if(!rs.length) return "free";
   return rs.length===1?"once":"multi";
 }

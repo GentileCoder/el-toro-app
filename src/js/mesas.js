@@ -183,7 +183,7 @@ function closeTable(method){
   saveToCloud();
 }
 
-function openTableSettings(){settingsCopy=JSON.parse(JSON.stringify(sections));renderSettingsSections();ge("settingsOverlay").classList.add("open");}
+function openTableSettings(){settingsCopy=JSON.parse(JSON.stringify(sections));renderSettingsSections();ge("settingsOpenTime").value=restaurantHours.open;ge("settingsCloseTime").value=restaurantHours.close;ge("settingsOverlay").classList.add("open");}
 
 function renderSettingsSections(){
   ge("settingsSections").innerHTML=settingsCopy.map(function(sec){
@@ -235,6 +235,9 @@ function saveTableSettings(){
       return obj;
     }).filter(function(tb){return tb.label.trim()!="";})};
   }).filter(function(s){return s.name.trim()!="";});
+  var ot=ge("settingsOpenTime").value; var ct=ge("settingsCloseTime").value;
+  if(ot) restaurantHours.open=ot;
+  if(ct) restaurantHours.close=ct;
   ge("settingsOverlay").classList.remove("open");
   activeMesasSection="all"; activeResSection="all";
   renderMesasOverview(); renderReservationsTab(); saveToCloud();
